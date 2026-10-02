@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CodeCrypt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+:root{
+  --bg:#08161A; --surface:#0E2227; --surface2:#143037; --line:#1F3D44;
+  --text:#E8F0EE; --muted:#86A3A3; --amber:#FFB02E; --amber-ink:#2A1A00;
+  --danger:#FF7A68; --ok:#5ED6A4;
+  --head:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.page{padding:20px 0 110px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(8,22,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{font-family:var(--head);font-weight:800;font-size:19px;display:flex;align-items:center;gap:9px}
+.brand i{font-style:normal;font-family:var(--mono);background:var(--amber);color:var(--amber-ink);width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:13px;font-weight:500}
+.nav-d{display:none;gap:4px}
+.nav-d button,.bot button{padding:8px 14px;border-radius:9px;color:var(--muted);font-weight:500}
+.nav-d button.on,.bot button.on{color:var(--amber);background:var(--surface)}
+.bot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.bot button{flex:1;font-size:13px;padding:8px 4px}
+@media(min-width:760px){.nav-d{display:flex}.bot{display:none}.page{padding-bottom:50px}}
+
+/* buttons */
+.btn{padding:11px 18px;border-radius:10px;font-weight:600;background:var(--amber);color:var(--amber-ink);transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:7px 12px;font-size:14px;border-radius:8px}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid #4a2a2a}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5}
+
+/* hero */
+.hero{padding:26px 0 8px}
+.hero h1{font-size:clamp(30px,7vw,52px);font-weight:800;max-width:14ch}
+.hero p{color:var(--muted);margin:12px 0 18px;max-width:46ch}
+.term{background:#050E11;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:13.5px;min-height:128px;color:#BFD3CF;overflow:hidden}
+.term .p{color:var(--amber)}
+.term .o{color:var(--muted)}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--amber);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.cursor{animation:none}}
+
+/* sections */
+.sec{margin-top:30px}
+.sec h2{font-size:22px;margin-bottom:14px}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:860px){.grid.c3{grid-template-columns:1fr 1fr 1fr}}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:760px){.cats{grid-template-columns:repeat(3,1fr)}}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.cat:hover{border-color:var(--amber)}
+.cat.big{grid-column:span 2;background:linear-gradient(160deg,var(--surface2),var(--surface))}
+@media(min-width:760px){.cat.big{grid-column:span 1}}
+.glyph{font-family:var(--mono);font-size:14px;width:42px;height:42px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;color:var(--amber)}
+.cat b{font-family:var(--head);font-size:17px}
+.cat span.s{color:var(--muted);font-size:13px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.card .thumb{height:92px;background:var(--surface2);display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px;font-family:var(--mono);color:var(--amber);font-size:22px;border-bottom:1px solid var(--line)}
+.card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:17px}
+.muted{color:var(--muted);font-size:14px}
+.tag{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.free{color:var(--ok);border-color:#1f4a3b}
+.tag.paid{color:var(--amber);border-color:#5a4210}
+.tag.lock{color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px}
+.row.sp{justify-content:space-between}
+.wrapx{flex-wrap:wrap}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 -18px;padding-left:18px;padding-right:18px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:8px 15px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:500}
+.chip.on{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;margin:12px 0}
+.seg button{padding:8px 18px;border-radius:8px;color:var(--muted);font-weight:500}
+.seg button.on{background:var(--amber);color:var(--amber-ink)}
+
+/* player */
+.player{aspect-ratio:16/9;background:#050E11;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;place-items:center;text-align:center;color:var(--muted)}
+.player iframe,.player video{width:100%;height:100%;border:0}
+.lock-box{padding:20px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.lesson{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left}
+.lesson.on{border-color:var(--amber)}
+.lesson .n{font-family:var(--mono);width:28px;color:var(--muted);font-size:13px}
+.lesson .t{flex:1;font-weight:500}
+.bar{height:6px;background:var(--surface2);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--amber)}
+
+/* commands */
+.cmd{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+pre.code{font-family:var(--mono);font-size:13.5px;background:#050E11;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;color:#D6E6E2;white-space:pre-wrap;word-break:break-word}
+pre.code.masked{filter:blur(5px);user-select:none}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:14px;color:var(--muted)}
+.inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%}
+.inp:focus{border-color:var(--amber);outline:none}
+textarea.inp{min-height:84px;resize:vertical}
+.auth{max-width:400px;margin:24px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.err{color:var(--danger);font-size:14px;margin-bottom:12px}
+.switch{display:flex;align-items:center;gap:10px}
+.switch input{width:20px;height:20px;accent-color:var(--amber)}
+
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(2,8,10,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:20px}
+@media(min-width:600px){.ov{align-items:center}.sheet{border-radius:18px}}
+.qr{width:200px;height:200px;margin:6px auto 14px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;color:#333;font-size:13px;text-align:center;padding:12px}
+.qr img{width:100%;height:100%;object-fit:contain}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--amber);color:var(--amber-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sub{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.empty{padding:30px 10px;text-align:center;color:var(--muted)}
+
+.bot button{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bot svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.search{position:relative;margin:0 0 12px}
+.search input{padding-left:40px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
+.adminbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px dashed var(--amber);border-radius:12px;padding:10px 12px;margin:14px 0}
+.adminbar b{color:var(--amber);font-family:var(--head)}
+.stats{display:flex;gap:22px;margin-top:16px;flex-wrap:wrap}
+.stats div{display:flex;flex-direction:column}
+.stats strong{font-family:var(--head);font-size:24px}
+.stats span{color:var(--muted);font-size:13px}
+.steps{margin:10px 0 14px 18px;color:var(--muted);display:grid;gap:4px;font-size:15px}
+.row.end{justify-content:flex-end}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, createContext, useContext } = React;
+
+/* ============================================================
+   CONFIG  (Supabase details yaha baad me daalni hain)
+   ============================================================ */
+const CONFIG = {
+  SUPABASE_URL: "",       // TODO: https://xxxx.supabase.co
+  SUPABASE_ANON_KEY: "",  // TODO: anon public key
+};
+// Demo mode: data sirf memory me hai (refresh par reset). Supabase judne ke baad permanent ho jayega.
+
+const CATS = [
+  { id: "hacking", hue: 28, name: "Hacking",        glyph: "#!",  sub: "Courses and commands" },
+  { id: "frontend", hue: 200, name: "Frontend",       glyph: "</>", sub: "HTML, CSS, React" },
+  { id: "backend", hue: 262, name: "Backend",        glyph: "{ }", sub: "APIs and servers" },
+  { id: "ai", hue: 305, name: "AI",             glyph: "AI",  sub: "Models and prompts" },
+  { id: "git", hue: 8, name: "Git and GitHub", glyph: "git", sub: "Version control" },
+  { id: "database", hue: 150, name: "Database",       glyph: "SQL", sub: "Design and queries" },
+];
+const catOf = (id) => CATS.find((c) => c.id === id) || CATS[0];
+
+let _id = 100;
+const uid = (p = "id") => p + "_" + ++_id + Math.random().toString(36).slice(2, 6);
+
+const L = (title, duration, preview = false) => ({ id: uid("l"), title, url: "", duration, preview });
+
+const seed = () => ({
+  users: [
+    { id: "u_admin", name: "Praveen", email: "praveen@admin.com", password: "admin123", role: "admin" },
+  ],
+  courses: [
+    { id: "c1", category: "hacking", title: "Ethical Hacking from Zero", desc: "Networking basics, recon, web app testing and how to report what you find.", isFree: false, price: 999,
+      lessons: [L("How hackers think", "08:20", true), L("Setting up your lab", "14:05"), L("Network scanning", "19:40"), L("Web app basics", "22:10")] },
+    { id: "c2", category: "hacking", title: "Linux for Hackers", desc: "The terminal skills every security learner needs.", isFree: true, price: 0,
+      lessons: [L("Why Linux", "06:10", true), L("Files and permissions", "12:30"), L("Bash scripting", "17:45")] },
+    { id: "c3", category: "frontend", title: "HTML and CSS Crash Course", desc: "Build real pages from scratch and make them look good on mobile.", isFree: true, price: 0,
+      lessons: [L("Page structure", "10:00", true), L("Flexbox and grid", "16:30"), L("Responsive layout", "13:15")] },
+    { id: "c4", category: "frontend", title: "React in a Weekend", desc: "Components, state and building a complete app.", isFree: false, price: 499,
+      lessons: [L("Your first component", "09:40", true), L("State and props", "15:20"), L("Deploy your app", "11:00")] },
+    { id: "c5", category: "backend", title: "Node.js and APIs", desc: "Build and secure a REST API.", isFree: false, price: 599,
+      lessons: [L("Express basics", "12:10", true), L("Auth and JWT", "18:00"), L("Deploying to the cloud", "10:25")] },
+    { id: "c6", category: "ai", title: "AI for Developers", desc: "Use AI APIs in your own projects.", isFree: false, price: 399,
+      lessons: [L("How LLMs work", "11:30", true), L("Calling an AI API", "14:00")] },
+    { id: "c7", category: "git", title: "Git and GitHub Basics", desc: "Commits, branches, pull requests and teamwork.", isFree: true, price: 0,
+      lessons: [L("Your first commit", "07:50", true), L("Branches and merging", "13:40"), L("Open source workflow", "12:00")] },
+    { id: "c8", category: "database", title: "SQL and Supabase", desc: "Design tables, write queries and secure data with row-level security.", isFree: false, price: 449,
+      lessons: [L("Tables and keys", "10:15", true), L("Joins", "14:50"), L("Row level security", "16:20")] },
+  ],
+  commands: [
+    { id: "m1", title: "Scan open ports and services", cmd: "nmap -sV -p- 192.168.1.10", desc: "Finds every open port on a host you own or have permission to test and detects the service version.", isFree: true, price: 0 },
+    { id: "m2", title: "Domain registration lookup", cmd: "whois example.com", desc: "Shows who registered a domain and when.", isFree: true, price: 0 },
+    { id: "m3", title: "Find hidden web directories", cmd: "gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt", desc: "Brute-forces common paths on a web server to discover pages that are not linked.", isFree: false, price: 99 },
+    { id: "m4", title: "Capture packets on an interface", cmd: "sudo tcpdump -i eth0 -w capture.pcap", desc: "Saves network traffic to a file you can open in Wireshark.", isFree: false, price: 99 },
+  ],
+  purchases: [],
+  progress: {},
+  settings: { siteName: "CodeCrypt", upi: "praveen@upi", qrUrl: "" },
+});
+
+const embedUrl = (u) => {
+  if (!u) return null;
+  const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return m ? { type: "iframe", src: "https://www.youtube.com/embed/" + m[1] } : { type: "video", src: u };
+};
+
+const ICONS = {
+  home: <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>,
+  browse: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>,
+  learning: <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>,
+  admin: <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>,
+};
+const Ctx = createContext(null);
+const useApp = () => useContext(Ctx);
+
+/* ============================================================
+   APP
+   ============================================================ */
+function App() {
+  const [db, setDb] = useState(seed);
+  const [me, setMe] = useState(null);
+  const [view, setView] = useState({ name: "home" });
+  const [modal, setModal] = useState(null);
+  const [toast, setToast] = useState("");
+
+  const say = (t) => { setToast(t); setTimeout(() => setToast(""), 2400); };
+  const go = (name, params = {}) => { setView({ name, ...params }); window.scrollTo(0, 0); };
+  const isAdmin = !!me && me.role === "admin";
+
+  const purchaseOf = (type, id) => me && db.purchases.find((p) => p.userId === me.id && p.itemType === type && p.itemId === id && p.status !== "rejected");
+  const hasAccess = (type, item) => item.isFree || isAdmin || (purchaseOf(type, item.id) || {}).status === "approved";
+
+  const buy = (type, item) => {
+    if (!me) { setModal(null); go("auth"); say("Login first to buy"); return; }
+    setModal({ kind: "buy", type, item });
+  };
+
+  const api = {
+    db, setDb, me, setMe, view, go, say, modal, setModal, isAdmin, hasAccess, purchaseOf, buy,
+    login: (email, password) => {
+      const u = db.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.password === password);
+      if (!u) return "Wrong email or password.";
+      setMe(u); go("home"); say("Welcome back, " + u.name); return "";
+    },
+    signup: (name, email, password) => {
+      if (!name.trim() || !email.trim() || password.length < 6) return "Fill all fields. Password needs 6+ characters.";
+      if (db.users.some((x) => x.email.toLowerCase() === email.trim().toLowerCase())) return "This email already has an account.";
+      const u = { id: uid("u"), name: name.trim(), email: email.trim(), password, role: "user" };
+      setDb((d) => ({ ...d, users: [...d.users, u] })); setMe(u); go("home"); say("Account created"); return "";
+    },
+    logout: () => { setMe(null); go("home"); },
+  };
+
+  const tabs = [["home", "Home"], ["browse", "Browse"], ["learning", "My learning"]];
+  if (isAdmin) tabs.push(["admin", "Admin"]);
+  const active = view.name === "course" ? "browse" : view.name;
+
+  return (
+    <Ctx.Provider value={api}>
+      <header className="top">
+        <div className="wrap">
+          <button className="brand" onClick={() => go("home")}><i>&gt;_</i>{db.settings.siteName}</button>
+          <nav className="nav-d">
+            {tabs.map(([k, n]) => <button key={k} className={active === k ? "on" : ""} onClick={() => go(k)}>{n}</button>)}
+          </nav>
+          {me
+            ? <div className="row"><span className="muted">{me.name}{isAdmin ? " (admin)" : ""}</span><button className="btn ghost sm" onClick={api.logout}>Logout</button></div>
+            : <button className="btn sm" onClick={() => go("auth")}>Login</button>}
+        </div>
+      </header>
+
+      <main className="wrap page">
+        {view.name === "home" && <Home />}
+        {view.name === "auth" && <Auth />}
+        {view.name === "browse" && <Browse key={view.cat || "all"} />}
+        {view.name === "course" && <CoursePage id={view.id} />}
+        {view.name === "learning" && <Learning />}
+        {view.name === "admin" && (isAdmin ? <Admin /> : <div className="empty">Only the admin can open this page.</div>)}
+      </main>
+
+      <nav className="bot">
+        {tabs.map(([k, n]) => <button key={k} className={active === k ? "on" : ""} onClick={() => go(k)}>{ICONS[k]}<span>{n}</span></button>)}
+      </nav>
+
+      {modal && modal.kind === "buy" && <BuyModal type={modal.type} item={modal.item} />}
+      {modal && modal.kind === "course" && <CourseForm course={modal.course} />}
+      {modal && modal.kind === "command" && <CommandForm command={modal.command} />}
+      {toast && <div className="toast" role="status">{toast}</div>}
+    </Ctx.Provider>
+  );
+}
+
+/* ============================================================
+   SMALL PIECES
+   ============================================================ */
+function PriceTag({ item, owned }) {
+  if (item.isFree) return <span className="tag free">Free</span>;
+  if (owned) return <span className="tag free">Unlocked</span>;
+  return <span className="tag paid">₹{item.price}</span>;
+}
+
+function Typing() {
+  const lines = [
+    ["whoami", "student"],
+    ["ls courses/", "hacking  frontend  backend  ai  git  database"],
+    ["unlock --course ethical-hacking", "payment verified. access granted."],
+  ];
+  const [n, setN] = useState(0);
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const total = lines.reduce((a, l) => a + l[0].length, 0);
+  useEffect(() => {
+    if (reduce) { setN(total); return; }
+    const t = setInterval(() => setN((x) => (x < total ? x + 1 : x)), 55);
+    return () => clearInterval(t);
+  }, []);
+  let left = n;
+  return (
+    <div className="term" aria-label="Terminal preview">
+      {lines.map((l, i) => {
+        const show = Math.max(0, Math.min(left, l[0].length));
+        const done = left >= l[0].length;
+        left -= l[0].length;
+        if (show === 0 && i > 0 && !done) return null;
+        return (
+          <div key={i}>
+            <span className="p">$ </span>{l[0].slice(0, show)}
+            {!done && <span className="cursor" />}
+            {done && <div className="o">{l[1]}</div>}
+          </div>
+        );
+      })}
+      {n >= total && <div><span className="p">$ </span><span className="cursor" /></div>}
+    </div>
+  );
+}
+
+function CourseCard({ c }) {
+  const { go, hasAccess, purchaseOf } = useApp();
+  const owned = hasAccess("course", c);
+  const pend = (purchaseOf("course", c.id) || {}).status === "pending";
+  return (
+    <button className="card" onClick={() => go("course", { id: c.id })}>
+      <div className="thumb" style={{ background: "linear-gradient(135deg, hsl(" + catOf(c.category).hue + " 45% 18%), var(--surface2))" }}><span>{catOf(c.category).glyph}</span><span className="tag">{catOf(c.category).name}</span></div>
+      <div className="body">
+        <h3>{c.title}</h3>
+        <p className="muted">{c.lessons.length} lessons</p>
+        <div className="row sp" style={{ marginTop: "auto", paddingTop: 6 }}>
+          <PriceTag item={c} owned={owned} />
+          {pend && <span className="tag">Payment under review</span>}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function Home() {
+  const { db, go, me, isAdmin, setModal } = useApp();
+  const waiting = db.purchases.filter((p) => p.status === "pending").length;
+  const count = (id) => db.courses.filter((c) => c.category === id).length + (id === "hacking" ? db.commands.length : 0);
+  return (
+    <>
+      <section className="hero">
+        <h1>Learn tech by doing it.</h1>
+        <p>Hacking, web development, AI, Git and databases. Video lessons from Praveen. Free to start, pay only for the courses you want.</p>
+        <div className="row wrapx" style={{ marginBottom: 18 }}>
+          <button className="btn" onClick={() => go("browse")}>Browse courses</button>
+          {!me && <button className="btn ghost" onClick={() => go("auth")}>Create account</button>}
+        </div>
+        <Typing />
+        <div className="stats">
+          <div><strong>{db.courses.length}</strong><span>courses</span></div>
+          <div><strong>{db.commands.length}</strong><span>hacking commands</span></div>
+          <div><strong>{db.courses.filter((c) => c.isFree).length}</strong><span>free courses</span></div>
+        </div>
+      </section>
+
+      {isAdmin && (
+        <div className="adminbar">
+          <b>Admin</b>
+          <button className="btn sm" onClick={() => setModal({ kind: "course", course: null })}>Add course</button>
+          <button className="btn ghost sm" onClick={() => setModal({ kind: "command", command: null })}>Add command</button>
+          <button className="btn ghost sm" onClick={() => go("admin")}>Payments{waiting ? " (" + waiting + ")" : ""}</button>
+        </div>
+      )}
+
+      <section className="sec">
+        <h2>Pick a track</h2>
+        <div className="cats">
+          {CATS.map((c) => (
+            <button key={c.id} className={"cat" + (c.id === "hacking" ? " big" : "")} onClick={() => go("browse", { cat: c.id })}>
+              <span className="glyph">{c.glyph}</span>
+              <b>{c.name}</b>
+              <span className="s">{c.sub} · {count(c.id)} items</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="sec">
+        <h2>Free to start</h2>
+        <div className="grid">
+          {db.courses.filter((c) => c.isFree).slice(0, 4).map((c) => <CourseCard key={c.id} c={c} />)}
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+function Auth() {
+  const { login, signup } = useApp();
+  const [mode, setMode] = useState("login");
+  const [f, setF] = useState({ name: "", email: "", password: "" });
+  const [err, setErr] = useState("");
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const submit = (e) => {
+    e.preventDefault();
+    setErr(mode === "login" ? login(f.email, f.password) : signup(f.name, f.email, f.password));
+  };
+  return (
+    <div className="auth">
+      <h2 style={{ marginBottom: 4 }}>{mode === "login" ? "Log in" : "Create your account"}</h2>
+      <p className="muted" style={{ marginBottom: 18 }}>{mode === "login" ? "Continue where you left off." : "Takes less than a minute."}</p>
+      <form onSubmit={submit}>
+        {mode === "signup" && <div className="field"><label htmlFor="n">Name</label><input id="n" className="inp" value={f.name} onChange={set("name")} autoComplete="name" /></div>}
+        <div className="field"><label htmlFor="e">Email</label><input id="e" type="email" className="inp" value={f.email} onChange={set("email")} autoComplete="email" /></div>
+        <div className="field"><label htmlFor="p">Password</label><input id="p" type="password" className="inp" value={f.password} onChange={set("password")} autoComplete={mode === "login" ? "current-password" : "new-password"} /></div>
+        {err && <div className="err" role="alert">{err}</div>}
+        <button className="btn block" type="submit">{mode === "login" ? "Log in" : "Sign up"}</button>
+      </form>
+      <p className="muted" style={{ marginTop: 16, textAlign: "center" }}>
+        {mode === "login" ? "New here? " : "Already have an account? "}
+        <button style={{ color: "var(--amber)", fontWeight: 600 }} onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(""); }}>
+          {mode === "login" ? "Create an account" : "Log in"}
+        </button>
+      </p>
+      <p className="muted" style={{ marginTop: 14, fontSize: 12.5, textAlign: "center" }}>Demo admin: praveen@admin.com / admin123</p>
+    </div>
+  );
+}
+
+/* ============================================================
+   BROWSE (Hacking has Courses + Commands)
+   ============================================================ */
+function Browse() {
+  const { db, view, go, isAdmin, setModal } = useApp();
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState(view.cat || "all");
+  const [tab, setTab] = useState("courses");
+  const courses = db.courses.filter((c) => (cat === "all" || c.category === cat) && c.title.toLowerCase().includes(q.trim().toLowerCase()));
+  const showTabs = cat === "hacking";
+  return (
+    <>
+      <div className="row sp" style={{ marginBottom: 14 }}>
+        <h2 style={{ fontSize: 28 }}>Browse</h2>
+        {isAdmin && <button className="btn sm" onClick={() => setModal({ kind: "course", course: null })}>Add course</button>}
+      </div>
+      <div className="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input className="inp" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search courses" aria-label="Search courses" />
+      </div>
+      <div className="chips">
+        <button className={"chip" + (cat === "all" ? " on" : "")} onClick={() => setCat("all")}>All</button>
+        {CATS.map((c) => <button key={c.id} className={"chip" + (cat === c.id ? " on" : "")} onClick={() => { setCat(c.id); setTab("courses"); }}>{c.name}</button>)}
+      </div>
+
+      {showTabs && (
+        <div className="seg" role="tablist">
+          <button className={tab === "courses" ? "on" : ""} onClick={() => setTab("courses")}>Courses</button>
+          <button className={tab === "commands" ? "on" : ""} onClick={() => setTab("commands")}>Commands</button>
+        </div>
+      )}
+
+      {(!showTabs || tab === "courses") && (
+        courses.length
+          ? <div className="grid" style={{ marginTop: 14 }}>{courses.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+          : <div className="empty">{q ? "No course matches your search." : "No courses here yet."}</div>
+      )}
+      {showTabs && tab === "commands" && <Commands />}
+    </>
+  );
+}
+
+function Commands() {
+  const { db, setDb, hasAccess, buy, say, purchaseOf, isAdmin, setModal } = useApp();
+  const copy = (t) => { navigator.clipboard && navigator.clipboard.writeText(t); say("Command copied"); };
+  const del = (id) => { if (confirm("Delete this command?")) { setDb((d) => ({ ...d, commands: d.commands.filter((c) => c.id !== id) })); say("Deleted"); } };
+  return (
+    <>
+      {isAdmin && (
+        <div className="adminbar">
+          <b>Admin</b>
+          <button className="btn sm" onClick={() => setModal({ kind: "command", command: null })}>Write a new command</button>
+        </div>
+      )}
+      {!db.commands.length && <div className="empty">No commands added yet.</div>}
+      <div className="grid" style={{ marginTop: 6 }}>
+        {db.commands.map((m) => {
+          const open = hasAccess("command", m);
+          const pend = (purchaseOf("command", m.id) || {}).status === "pending";
+          return (
+            <div className="cmd" key={m.id}>
+              <div className="row sp"><h3 style={{ fontSize: 17 }}>{m.title}</h3><PriceTag item={m} owned={open} /></div>
+              <p className="muted">{m.desc}</p>
+              <pre className={"code" + (open ? "" : " masked")}>{open ? m.cmd : "sudo ••••••••••• ••••••• ••••"}</pre>
+              <div className="row sp wrapx">
+                {open
+                  ? <button className="btn ghost sm" onClick={() => copy(m.cmd)}>Copy command</button>
+                  : pend
+                    ? <span className="muted">Payment under review</span>
+                    : <button className="btn sm" onClick={() => buy("command", m)}>Unlock for ₹{m.price}</button>}
+                {isAdmin && (
+                  <span className="row">
+                    <button className="btn ghost sm" onClick={() => setModal({ kind: "command", command: m })}>Edit</button>
+                    <button className="btn danger sm" onClick={() => del(m.id)}>Delete</button>
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+/* ============================================================
+   COURSE PAGE
+   ============================================================ */
+function CoursePage({ id }) {
+  const { db, setDb, me, hasAccess, buy, purchaseOf, go, isAdmin, setModal } = useApp();
+  const c = db.courses.find((x) => x.id === id);
+  const [lid, setLid] = useState(c && c.lessons[0] && c.lessons[0].id);
+  if (!c) return <div className="empty">This course was removed. <button style={{ color: "var(--amber)" }} onClick={() => go("browse")}>Back to browse</button></div>;
+
+  const owned = hasAccess("course", c);
+  const pend = (purchaseOf("course", c.id) || {}).status === "pending";
+  const lesson = c.lessons.find((l) => l.id === lid) || c.lessons[0];
+  const canPlay = lesson && (owned || lesson.preview);
+  const done = (l) => me && db.progress[me.id + ":" + l.id];
+  const doneCount = c.lessons.filter(done).length;
+  const pct = c.lessons.length ? Math.round((doneCount / c.lessons.length) * 100) : 0;
+  const media = lesson && embedUrl(lesson.url);
+
+  const toggleDone = () => {
+    if (!me) return;
+    const k = me.id + ":" + lesson.id;
+    setDb((d) => { const p = { ...d.progress }; p[k] ? delete p[k] : (p[k] = true); return { ...d, progress: p }; });
+  };
+
+  return (
+    <>
+      <button className="muted" onClick={() => go("browse", { cat: c.category })} style={{ marginBottom: 10 }}>Back to {catOf(c.category).name}</button>
+      <div className="player">
+        {!lesson ? <div className="lock-box">No lessons added yet.</div>
+          : !canPlay ? (
+            <div className="lock-box">
+              <div className="glyph">lock</div>
+              <b style={{ fontFamily: "var(--head)", fontSize: 18 }}>This lesson is locked</b>
+              <span className="muted">Buy the course to watch all {c.lessons.length} lessons.</span>
+              {pend ? <span className="tag">Payment under review</span> : <button className="btn" onClick={() => buy("course", c)}>Unlock for ₹{c.price}</button>}
+            </div>
+          ) : media ? (
+            media.type === "iframe"
+              ? <iframe src={media.src} title={lesson.title} allowFullScreen />
+              : <video src={media.src} controls />
+          ) : <div className="lock-box"><span className="muted">The admin has not added a video link for this lesson yet.</span></div>}
+      </div>
+
+      <div className="row sp wrapx" style={{ margin: "16px 0 6px" }}>
+        <h1 style={{ fontSize: 26 }}>{c.title}</h1>
+        <PriceTag item={c} owned={owned} />
+      </div>
+      <p className="muted" style={{ marginBottom: 14 }}>{c.desc}</p>
+      {isAdmin && (
+        <div className="adminbar">
+          <b>Admin</b>
+          <button className="btn sm" onClick={() => setModal({ kind: "course", course: c })}>Edit price, videos and lessons</button>
+        </div>
+      )}
+
+      {lesson && canPlay && me && (
+        <button className="btn ghost sm" onClick={toggleDone} style={{ marginBottom: 14 }}>{done(lesson) ? "Mark as not done" : "Mark lesson as done"}</button>
+      )}
+
+      {owned && me && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="row sp muted" style={{ marginBottom: 6 }}><span>Your progress</span><span>{doneCount} of {c.lessons.length} done</span></div>
+          <div className="bar"><i style={{ width: pct + "%" }} /></div>
+        </div>
+      )}
+
+      {!owned && !pend && (
+        <button className="btn block" style={{ marginBottom: 16 }} onClick={() => buy("course", c)}>Buy this course for ₹{c.price}</button>
+      )}
+      {!owned && pend && <div className="sub muted" style={{ textAlign: "center" }}>Your payment is being checked. The course opens once Praveen approves it.</div>}
+
+      <h2 style={{ fontSize: 20, margin: "10px 0 12px" }}>Lessons</h2>
+      <div style={{ display: "grid", gap: 8 }}>
+        {c.lessons.map((l, i) => {
+          const ok = owned || l.preview;
+          return (
+            <button key={l.id} className={"lesson" + (lesson && l.id === lesson.id ? " on" : "")} onClick={() => ok ? setLid(l.id) : buy("course", c)}>
+              <span className="n">{i + 1}</span>
+              <span className="t">{l.title}</span>
+              {done(l) && <span className="tag free">Done</span>}
+              {!ok && <span className="tag lock">Locked</span>}
+              {!owned && l.preview && <span className="tag free">Free preview</span>}
+              <span className="muted">{l.duration}</span>
+            </button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+/* ============================================================
+   MY LEARNING
+   ============================================================ */
+function Learning() {
+  const { db, me, hasAccess, go } = useApp();
+  if (!me) return <div className="empty">Log in to see your courses.<div style={{ marginTop: 12 }}><button className="btn" onClick={() => go("auth")}>Log in</button></div></div>;
+  const mine = db.courses.filter((c) => !c.isFree && hasAccess("course", c));
+  const pending = db.purchases.filter((p) => p.userId === me.id && p.status === "pending");
+  return (
+    <>
+      <h2 style={{ fontSize: 28, marginBottom: 14 }}>My learning</h2>
+      {pending.length > 0 && <div className="sub muted">{pending.length} payment(s) waiting for approval.</div>}
+      {mine.length
+        ? <div className="grid">{mine.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+        : <div className="empty">You have not bought any course yet.<div style={{ marginTop: 12 }}><button className="btn" onClick={() => go("browse")}>Find a course</button></div></div>}
+    </>
+  );
+}
+
+/* ============================================================
+   BUY MODAL  (manual QR payment + admin approval)
+   ============================================================ */
+function BuyModal({ type, item }) {
+  const { db, setDb, me, setModal, say } = useApp();
+  const [utr, setUtr] = useState("");
+  const [err, setErr] = useState("");
+  const s = db.settings;
+  const submit = () => {
+    if (utr.trim().length < 6) { setErr("Enter the UTR / transaction ID from your payment app."); return; }
+    const p = { id: uid("p"), userId: me.id, userName: me.name, itemType: type, itemId: item.id, itemTitle: item.title, amount: item.price, utr: utr.trim(), status: "pending", at: new Date().toLocaleString() };
+    setDb((d) => ({ ...d, purchases: [p, ...d.purchases] }));
+    setModal(null); say("Payment sent for approval");
+  };
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h2 style={{ fontSize: 22 }}>{item.title}</h2>
+        <ol className="steps"><li>Scan the QR and pay ₹{item.price}</li><li>Copy the UTR / transaction ID from your payment app</li><li>Enter it below and tap I have paid</li></ol>
+        <div className="qr">{s.qrUrl ? <img src={s.qrUrl} alt="Payment QR code" /> : "Praveen's QR code appears here. Add it in Admin, Settings."}</div>
+        <p style={{ textAlign: "center", fontFamily: "var(--mono)", marginBottom: 16 }}>{s.upi}</p>
+        <div className="field">
+          <label htmlFor="utr">After paying, enter the UTR / transaction ID</label>
+          <input id="utr" className="inp" value={utr} onChange={(e) => setUtr(e.target.value)} placeholder="e.g. 4081 2345 6789" />
+        </div>
+        {err && <div className="err" role="alert">{err}</div>}
+        <div className="row">
+          <button className="btn ghost" onClick={() => setModal(null)}>Cancel</button>
+          <button className="btn" style={{ flex: 1 }} onClick={submit}>I have paid</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function Admin() {
+  const { db, setDb, setModal, say } = useApp();
+  const [tab, setTab] = useState("courses");
+  const pending = db.purchases.filter((p) => p.status === "pending").length;
+  const setStatus = (id, status) => { setDb((d) => ({ ...d, purchases: d.purchases.map((p) => p.id === id ? { ...p, status } : p) })); say(status === "approved" ? "Approved. Course unlocked." : "Rejected"); };
+  const delCourse = (id) => { if (confirm("Delete this course?")) { setDb((d) => ({ ...d, courses: d.courses.filter((c) => c.id !== id) })); say("Deleted"); } };
+  const delCmd = (id) => { if (confirm("Delete this command?")) { setDb((d) => ({ ...d, commands: d.commands.filter((c) => c.id !== id) })); say("Deleted"); } };
+  const saveSet = (k) => (e) => setDb((d) => ({ ...d, settings: { ...d.settings, [k]: e.target.value } }));
+
+  return (
+    <>
+      <h2 style={{ fontSize: 28 }}>Admin panel</h2>
+      <div className="seg" role="tablist" style={{ maxWidth: "100%", overflowX: "auto" }}>
+        {[["courses", "Courses"], ["commands", "Commands"], ["payments", "Payments" + (pending ? " (" + pending + ")" : "")], ["settings", "Settings"]].map(([k, n]) =>
+          <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{n}</button>)}
+      </div>
+
+      {tab === "courses" && (
+        <>
+          <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "course", course: null })}>Add course</button>
+          {db.courses.map((c) => (
+            <div className="item" key={c.id}>
+              <div style={{ minWidth: 0 }}>
+                <b>{c.title}</b>
+                <div className="muted">{catOf(c.category).name} · {c.lessons.length} lessons · {c.isFree ? "Free" : "₹" + c.price}</div>
+              </div>
+              <div className="row">
+                <button className="btn ghost sm" onClick={() => setModal({ kind: "course", course: c })}>Edit</button>
+                <button className="btn danger sm" onClick={() => delCourse(c.id)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {tab === "commands" && (
+        <>
+          <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "command", command: null })}>Add command</button>
+          {db.commands.map((m) => (
+            <div className="item" key={m.id}>
+              <div style={{ minWidth: 0 }}>
+                <b>{m.title}</b>
+                <div className="muted">{m.isFree ? "Free" : "₹" + m.price}</div>
+              </div>
+              <div className="row">
+                <button className="btn ghost sm" onClick={() => setModal({ kind: "command", command: m })}>Edit</button>
+                <button className="btn danger sm" onClick={() => delCmd(m.id)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {tab === "payments" && (
+        db.purchases.length === 0 ? <div className="empty">No payments yet. When a student pays, it shows up here for approval.</div> :
+        db.purchases.map((p) => (
+          <div className="item" key={p.id}>
+            <div style={{ minWidth: 0 }}>
+              <b>{p.userName}</b> bought {p.itemTitle}
+              <div className="muted">₹{p.amount} · UTR {p.utr} · {p.at}</div>
+              {p.status !== "pending" && <span className={"tag " + (p.status === "approved" ? "free" : "")}>{p.status}</span>}
+            </div>
+            {p.status === "pending" && (
+              <div className="row">
+                <button className="btn sm" onClick={() => setStatus(p.id, "approved")}>Approve</button>
+                <button className="btn danger sm" onClick={() => setStatus(p.id, "rejected")}>Reject</button>
+              </div>
+            )}
+          </div>
+        ))
+      )}
+
+      {tab === "settings" && (
+        <div style={{ maxWidth: 460 }}>
+          <div className="field"><label htmlFor="sn">App name</label><input id="sn" className="inp" value={db.settings.siteName} onChange={saveSet("siteName")} /></div>
+          <div className="field"><label htmlFor="su">UPI ID</label><input id="su" className="inp" value={db.settings.upi} onChange={saveSet("upi")} /></div>
+          <div className="field"><label htmlFor="sq">QR code image link</label><input id="sq" className="inp" value={db.settings.qrUrl} onChange={saveSet("qrUrl")} placeholder="https://..." /></div>
+          <p className="muted">Paste a link to your payment QR image. Later it will be uploaded to Supabase Storage.</p>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ---------- Free / Paid control reused in both forms ---------- */
+function PriceField({ f, setF }) {
+  return (
+    <div className="field">
+      <label>Access</label>
+      <div className="seg" style={{ margin: 0, alignSelf: "flex-start" }}>
+        <button type="button" className={f.isFree ? "on" : ""} onClick={() => setF({ ...f, isFree: true })}>Free</button>
+        <button type="button" className={!f.isFree ? "on" : ""} onClick={() => setF({ ...f, isFree: false })}>Paid</button>
+      </div>
+      {!f.isFree && (
+        <input className="inp" type="number" min="1" value={f.price} onChange={(e) => setF({ ...f, price: e.target.value })} placeholder="Price in ₹" aria-label="Price in rupees" />
+      )}
+    </div>
+  );
+}
+
+function CourseForm({ course }) {
+  const { setDb, setModal, say } = useApp();
+  const [f, setF] = useState(course ? { ...course, lessons: course.lessons.map((l) => ({ ...l })) } : { title: "", desc: "", category: "hacking", isFree: false, price: 499, lessons: [] });
+  const [err, setErr] = useState("");
+  const upL = (i, k, v) => setF({ ...f, lessons: f.lessons.map((l, j) => j === i ? { ...l, [k]: v } : l) });
+  const save = () => {
+    if (!f.title.trim()) { setErr("Add a course title."); return; }
+    const out = { ...f, id: f.id || uid("c"), price: f.isFree ? 0 : Number(f.price) || 0 };
+    setDb((d) => ({ ...d, courses: course ? d.courses.map((c) => c.id === out.id ? out : c) : [out, ...d.courses] }));
+    setModal(null); say(course ? "Course saved" : "Course added");
+  };
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{course ? "Edit course" : "Add course"}</h2>
+        <div className="field"><label htmlFor="ct">Title</label><input id="ct" className="inp" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></div>
+        <div className="field"><label htmlFor="cd">Description</label><textarea id="cd" className="inp" value={f.desc} onChange={(e) => setF({ ...f, desc: e.target.value })} /></div>
+        <div className="field"><label htmlFor="cc">Category</label>
+          <select id="cc" className="inp" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
+            {CATS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <PriceField f={f} setF={setF} />
+
+        <h3 style={{ fontSize: 17, margin: "6px 0 10px" }}>Lessons</h3>
+        {f.lessons.map((l, i) => (
+          <div className="sub" key={l.id}>
+            <div className="field"><label>Lesson {i + 1} title</label><input className="inp" value={l.title} onChange={(e) => upL(i, "title", e.target.value)} /></div>
+            <div className="field"><label>Video link (YouTube or .mp4)</label><input className="inp" value={l.url} onChange={(e) => upL(i, "url", e.target.value)} placeholder="https://..." /></div>
+            <div className="field"><label>Or pick a video from your device (works for this session only)</label>
+              <input type="file" accept="video/*" onChange={(e) => { const file = e.target.files[0]; if (file) { upL(i, "url", URL.createObjectURL(file)); say("Video attached"); } }} /></div>
+            <div className="row sp wrapx">
+              <input className="inp" style={{ width: 110 }} value={l.duration} onChange={(e) => upL(i, "duration", e.target.value)} placeholder="mm:ss" aria-label="Duration" />
+              <label className="switch"><input type="checkbox" checked={l.preview} onChange={(e) => upL(i, "preview", e.target.checked)} />Free preview</label>
+              <button className="btn danger sm" onClick={() => setF({ ...f, lessons: f.lessons.filter((_, j) => j !== i) })}>Remove</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn ghost sm" style={{ marginBottom: 16 }} onClick={() => setF({ ...f, lessons: [...f.lessons, { id: uid("l"), title: "", url: "", duration: "", preview: false }] })}>Add lesson</button>
+
+        {err && <div className="err" role="alert">{err}</div>}
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save}>Save course</button></div>
+      </div>
+    </div>
+  );
+}
+
+function CommandForm({ command }) {
+  const { setDb, setModal, say } = useApp();
+  const [f, setF] = useState(command || { title: "", cmd: "", desc: "", isFree: true, price: 99 });
+  const [err, setErr] = useState("");
+  const save = () => {
+    if (!f.title.trim() || !f.cmd.trim()) { setErr("Add a title and the command."); return; }
+    const out = { ...f, id: f.id || uid("m"), price: f.isFree ? 0 : Number(f.price) || 0 };
+    setDb((d) => ({ ...d, commands: command ? d.commands.map((c) => c.id === out.id ? out : c) : [out, ...d.commands] }));
+    setModal(null); say(command ? "Command saved" : "Command added");
+  };
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{command ? "Edit command" : "Add command"}</h2>
+        <div className="field"><label htmlFor="mt">Title</label><input id="mt" className="inp" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></div>
+        <div className="field"><label htmlFor="mc">Command</label><textarea id="mc" className="inp" style={{ fontFamily: "var(--mono)" }} value={f.cmd} onChange={(e) => setF({ ...f, cmd: e.target.value })} /></div>
+        <div className="field"><label htmlFor="md">What it does</label><textarea id="md" className="inp" value={f.desc} onChange={(e) => setF({ ...f, desc: e.target.value })} /></div>
+        <PriceField f={f} setF={setF} />
+        {err && <div className="err" role="alert">{err}</div>}
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save}>Save command</button></div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
