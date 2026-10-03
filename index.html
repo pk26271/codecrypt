@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#08161A" />
 <title>CodeCrypt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#08161A; --surface:#0E2227; --surface2:#143037; --line:#1F3D44;
@@ -28,28 +30,26 @@ h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
 .wrap{max-width:980px;margin:0 auto;padding:0 18px}
 .page{padding:20px 0 110px}
 
-/* top bar */
 .top{position:sticky;top:0;z-index:20;background:rgba(8,22,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
-.brand{font-family:var(--head);font-weight:800;font-size:19px;display:flex;align-items:center;gap:9px}
+.brand{font-family:var(--head);font-weight:800;font-size:19px;display:flex;align-items:center;gap:9px;color:var(--text)}
 .brand i{font-style:normal;font-family:var(--mono);background:var(--amber);color:var(--amber-ink);width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:13px;font-weight:500}
 .nav-d{display:none;gap:4px}
 .nav-d button,.bot button{padding:8px 14px;border-radius:9px;color:var(--muted);font-weight:500}
 .nav-d button.on,.bot button.on{color:var(--amber);background:var(--surface)}
 .bot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
-.bot button{flex:1;font-size:13px;padding:8px 4px}
+.bot button{flex:1;font-size:12.5px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bot svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:760px){.nav-d{display:flex}.bot{display:none}.page{padding-bottom:50px}}
 
-/* buttons */
 .btn{padding:11px 18px;border-radius:10px;font-weight:600;background:var(--amber);color:var(--amber-ink);transition:transform .12s}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
 .btn.sm{padding:7px 12px;font-size:14px;border-radius:8px}
 .btn.danger{background:transparent;color:var(--danger);border:1px solid #4a2a2a}
 .btn.block{width:100%}
-.btn:disabled{opacity:.5}
+.btn:disabled{opacity:.5;cursor:default}
 
-/* hero */
 .hero{padding:26px 0 8px}
 .hero h1{font-size:clamp(30px,7vw,52px);font-weight:800;max-width:14ch}
 .hero p{color:var(--muted);margin:12px 0 18px;max-width:46ch}
@@ -59,16 +59,18 @@ h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
 .cursor{display:inline-block;width:8px;height:15px;background:var(--amber);vertical-align:-2px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.cursor{animation:none}}
+.stats{display:flex;gap:22px;margin-top:16px;flex-wrap:wrap}
+.stats div{display:flex;flex-direction:column}
+.stats strong{font-family:var(--head);font-size:24px}
+.stats span{color:var(--muted);font-size:13px}
 
-/* sections */
 .sec{margin-top:30px}
 .sec h2{font-size:22px;margin-bottom:14px}
 .grid{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
-@media(min-width:860px){.grid.c3{grid-template-columns:1fr 1fr 1fr}}
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(min-width:760px){.cats{grid-template-columns:repeat(3,1fr)}}
-.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .15s;color:var(--text)}
 .cat:hover{border-color:var(--amber)}
 .cat.big{grid-column:span 2;background:linear-gradient(160deg,var(--surface2),var(--surface))}
 @media(min-width:760px){.cat.big{grid-column:span 1}}
@@ -76,45 +78,43 @@ h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
 .cat b{font-family:var(--head);font-size:17px}
 .cat span.s{color:var(--muted);font-size:13px}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;display:flex;flex-direction:column}
-.card .thumb{height:92px;background:var(--surface2);display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px;font-family:var(--mono);color:var(--amber);font-size:22px;border-bottom:1px solid var(--line)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;display:flex;flex-direction:column;color:var(--text)}
+.card .thumb{height:92px;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px;font-family:var(--mono);color:var(--amber);font-size:22px;border-bottom:1px solid var(--line)}
 .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card h3{font-size:17px}
 .muted{color:var(--muted);font-size:14px}
 .tag{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
 .tag.free{color:var(--ok);border-color:#1f4a3b}
 .tag.paid{color:var(--amber);border-color:#5a4210}
-.tag.lock{color:var(--muted)}
 .row{display:flex;align-items:center;gap:10px}
 .row.sp{justify-content:space-between}
 .wrapx{flex-wrap:wrap}
 
-/* chips */
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 -18px;padding-left:18px;padding-right:18px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{padding:8px 15px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:500}
 .chip.on{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;margin:12px 0}
-.seg button{padding:8px 18px;border-radius:8px;color:var(--muted);font-weight:500}
+.seg button{padding:8px 18px;border-radius:8px;color:var(--muted);font-weight:500;white-space:nowrap}
 .seg button.on{background:var(--amber);color:var(--amber-ink)}
+.search{position:relative;margin:0 0 12px}
+.search input{padding-left:40px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
 
-/* player */
 .player{aspect-ratio:16/9;background:#050E11;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;place-items:center;text-align:center;color:var(--muted)}
 .player iframe,.player video{width:100%;height:100%;border:0}
 .lock-box{padding:20px;display:flex;flex-direction:column;gap:12px;align-items:center}
-.lesson{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left}
+.lesson{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;color:var(--text)}
 .lesson.on{border-color:var(--amber)}
 .lesson .n{font-family:var(--mono);width:28px;color:var(--muted);font-size:13px}
 .lesson .t{flex:1;font-weight:500}
 .bar{height:6px;background:var(--surface2);border-radius:9px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--amber)}
 
-/* commands */
 .cmd{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 pre.code{font-family:var(--mono);font-size:13.5px;background:#050E11;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;color:#D6E6E2;white-space:pre-wrap;word-break:break-word}
 pre.code.masked{filter:blur(5px);user-select:none}
 
-/* forms */
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .field label{font-size:14px;color:var(--muted)}
 .inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%}
@@ -122,33 +122,23 @@ pre.code.masked{filter:blur(5px);user-select:none}
 textarea.inp{min-height:84px;resize:vertical}
 .auth{max-width:400px;margin:24px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
 .err{color:var(--danger);font-size:14px;margin-bottom:12px}
+.info{color:var(--ok);font-size:14px;margin-bottom:12px}
 .switch{display:flex;align-items:center;gap:10px}
 .switch input{width:20px;height:20px;accent-color:var(--amber)}
 
-/* modal */
 .ov{position:fixed;inset:0;background:rgba(2,8,10,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:20px}
 @media(min-width:600px){.ov{align-items:center}.sheet{border-radius:18px}}
 .qr{width:200px;height:200px;margin:6px auto 14px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;color:#333;font-size:13px;text-align:center;padding:12px}
 .qr img{width:100%;height:100%;object-fit:contain}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--amber);color:var(--amber-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60}
-.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.steps{margin:10px 0 14px 18px;color:var(--muted);display:grid;gap:4px;font-size:15px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--amber);color:var(--amber-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60;max-width:90vw;text-align:center}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap}
 .sub{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .empty{padding:30px 10px;text-align:center;color:var(--muted)}
-
-.bot button{display:flex;flex-direction:column;align-items:center;gap:3px}
-.bot svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.search{position:relative;margin:0 0 12px}
-.search input{padding-left:40px}
-.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
 .adminbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px dashed var(--amber);border-radius:12px;padding:10px 12px;margin:14px 0}
 .adminbar b{color:var(--amber);font-family:var(--head)}
-.stats{display:flex;gap:22px;margin-top:16px;flex-wrap:wrap}
-.stats div{display:flex;flex-direction:column}
-.stats strong{font-family:var(--head);font-size:24px}
-.stats span{color:var(--muted);font-size:13px}
-.steps{margin:10px 0 14px 18px;color:var(--muted);display:grid;gap:4px;font-size:15px}
-.row.end{justify-content:flex-end}
+.boot{min-height:60vh;display:grid;place-items:center;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -158,67 +148,21 @@ textarea.inp{min-height:84px;resize:vertical}
 const { useState, useEffect, useRef, createContext, useContext } = React;
 
 /* ============================================================
-   CONFIG  (Supabase details yaha baad me daalni hain)
+   SUPABASE  (publishable key browser me safe hai)
    ============================================================ */
-const CONFIG = {
-  SUPABASE_URL: "",       // TODO: https://xxxx.supabase.co
-  SUPABASE_ANON_KEY: "",  // TODO: anon public key
-};
-// Demo mode: data sirf memory me hai (refresh par reset). Supabase judne ke baad permanent ho jayega.
+const SUPABASE_URL = "https://jvuxiqeigkxxssjqzcxp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_t8LYGJ9UI_eh8FJWJk6bXA_MLhOcsXl";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CATS = [
-  { id: "hacking", hue: 28, name: "Hacking",        glyph: "#!",  sub: "Courses and commands" },
+  { id: "hacking",  hue: 28,  name: "Hacking",        glyph: "#!",  sub: "Courses and commands" },
   { id: "frontend", hue: 200, name: "Frontend",       glyph: "</>", sub: "HTML, CSS, React" },
-  { id: "backend", hue: 262, name: "Backend",        glyph: "{ }", sub: "APIs and servers" },
-  { id: "ai", hue: 305, name: "AI",             glyph: "AI",  sub: "Models and prompts" },
-  { id: "git", hue: 8, name: "Git and GitHub", glyph: "git", sub: "Version control" },
+  { id: "backend",  hue: 262, name: "Backend",        glyph: "{ }", sub: "APIs and servers" },
+  { id: "ai",       hue: 305, name: "AI",             glyph: "AI",  sub: "Models and prompts" },
+  { id: "git",      hue: 8,   name: "Git and GitHub", glyph: "git", sub: "Version control" },
   { id: "database", hue: 150, name: "Database",       glyph: "SQL", sub: "Design and queries" },
 ];
 const catOf = (id) => CATS.find((c) => c.id === id) || CATS[0];
-
-let _id = 100;
-const uid = (p = "id") => p + "_" + ++_id + Math.random().toString(36).slice(2, 6);
-
-const L = (title, duration, preview = false) => ({ id: uid("l"), title, url: "", duration, preview });
-
-const seed = () => ({
-  users: [
-    { id: "u_admin", name: "Praveen", email: "praveen@admin.com", password: "admin123", role: "admin" },
-  ],
-  courses: [
-    { id: "c1", category: "hacking", title: "Ethical Hacking from Zero", desc: "Networking basics, recon, web app testing and how to report what you find.", isFree: false, price: 999,
-      lessons: [L("How hackers think", "08:20", true), L("Setting up your lab", "14:05"), L("Network scanning", "19:40"), L("Web app basics", "22:10")] },
-    { id: "c2", category: "hacking", title: "Linux for Hackers", desc: "The terminal skills every security learner needs.", isFree: true, price: 0,
-      lessons: [L("Why Linux", "06:10", true), L("Files and permissions", "12:30"), L("Bash scripting", "17:45")] },
-    { id: "c3", category: "frontend", title: "HTML and CSS Crash Course", desc: "Build real pages from scratch and make them look good on mobile.", isFree: true, price: 0,
-      lessons: [L("Page structure", "10:00", true), L("Flexbox and grid", "16:30"), L("Responsive layout", "13:15")] },
-    { id: "c4", category: "frontend", title: "React in a Weekend", desc: "Components, state and building a complete app.", isFree: false, price: 499,
-      lessons: [L("Your first component", "09:40", true), L("State and props", "15:20"), L("Deploy your app", "11:00")] },
-    { id: "c5", category: "backend", title: "Node.js and APIs", desc: "Build and secure a REST API.", isFree: false, price: 599,
-      lessons: [L("Express basics", "12:10", true), L("Auth and JWT", "18:00"), L("Deploying to the cloud", "10:25")] },
-    { id: "c6", category: "ai", title: "AI for Developers", desc: "Use AI APIs in your own projects.", isFree: false, price: 399,
-      lessons: [L("How LLMs work", "11:30", true), L("Calling an AI API", "14:00")] },
-    { id: "c7", category: "git", title: "Git and GitHub Basics", desc: "Commits, branches, pull requests and teamwork.", isFree: true, price: 0,
-      lessons: [L("Your first commit", "07:50", true), L("Branches and merging", "13:40"), L("Open source workflow", "12:00")] },
-    { id: "c8", category: "database", title: "SQL and Supabase", desc: "Design tables, write queries and secure data with row-level security.", isFree: false, price: 449,
-      lessons: [L("Tables and keys", "10:15", true), L("Joins", "14:50"), L("Row level security", "16:20")] },
-  ],
-  commands: [
-    { id: "m1", title: "Scan open ports and services", cmd: "nmap -sV -p- 192.168.1.10", desc: "Finds every open port on a host you own or have permission to test and detects the service version.", isFree: true, price: 0 },
-    { id: "m2", title: "Domain registration lookup", cmd: "whois example.com", desc: "Shows who registered a domain and when.", isFree: true, price: 0 },
-    { id: "m3", title: "Find hidden web directories", cmd: "gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt", desc: "Brute-forces common paths on a web server to discover pages that are not linked.", isFree: false, price: 99 },
-    { id: "m4", title: "Capture packets on an interface", cmd: "sudo tcpdump -i eth0 -w capture.pcap", desc: "Saves network traffic to a file you can open in Wireshark.", isFree: false, price: 99 },
-  ],
-  purchases: [],
-  progress: {},
-  settings: { siteName: "CodeCrypt", upi: "praveen@upi", qrUrl: "" },
-});
-
-const embedUrl = (u) => {
-  if (!u) return null;
-  const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? { type: "iframe", src: "https://www.youtube.com/embed/" + m[1] } : { type: "video", src: u };
-};
 
 const ICONS = {
   home: <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>,
@@ -226,6 +170,45 @@ const ICONS = {
   learning: <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>,
   admin: <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>,
 };
+
+const EMPTY = { courses: [], commands: [], bodies: {}, purchases: [], progress: {}, settings: { siteName: "CodeCrypt", upi: "", qrUrl: "" } };
+
+const newId = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === "x" ? r : (r & 3) | 8).toString(16); }));
+const safeName = (n) => n.replace(/[^\w.\-]/g, "_");
+
+async function fetchAll(userId) {
+  const [c, l, m, b, s, p, g] = await Promise.all([
+    sb.from("courses").select("*").order("created_at", { ascending: false }),
+    sb.from("lessons").select("*").order("position"),
+    sb.from("commands").select("*").order("created_at", { ascending: false }),
+    sb.from("command_bodies").select("*"),
+    sb.from("settings").select("*").eq("id", 1).maybeSingle(),
+    userId ? sb.from("purchases").select("*").order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
+    userId ? sb.from("progress").select("lesson_id").eq("user_id", userId) : Promise.resolve({ data: [] }),
+  ]);
+  const lessons = l.data || [];
+  const bodies = {}; (b.data || []).forEach((r) => (bodies[r.command_id] = r.body));
+  const progress = {}; (g.data || []).forEach((r) => (progress[r.lesson_id] = true));
+  const st = s.data;
+  return {
+    courses: (c.data || []).map((x) => ({
+      id: x.id, category: x.category, title: x.title, desc: x.description, isFree: x.is_free, price: x.price,
+      lessons: lessons.filter((y) => y.course_id === x.id).map((y) => ({ id: y.id, title: y.title, duration: y.duration, preview: y.is_preview })),
+    })),
+    commands: (m.data || []).map((x) => ({ id: x.id, title: x.title, desc: x.description, isFree: x.is_free, price: x.price })),
+    bodies,
+    purchases: (p.data || []).map((x) => ({ id: x.id, userId: x.user_id, userName: x.user_name, itemType: x.item_type, itemId: x.item_id, itemTitle: x.item_title, amount: x.amount, utr: x.utr, status: x.status, at: new Date(x.created_at).toLocaleString() })),
+    progress,
+    settings: st ? { siteName: st.site_name, upi: st.upi, qrUrl: st.qr_url } : EMPTY.settings,
+  };
+}
+
+const embedUrl = (u) => {
+  if (!u) return null;
+  const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  return m ? { type: "iframe", src: "https://www.youtube.com/embed/" + m[1] } : { type: "video", src: u };
+};
+
 const Ctx = createContext(null);
 const useApp = () => useContext(Ctx);
 
@@ -233,15 +216,47 @@ const useApp = () => useContext(Ctx);
    APP
    ============================================================ */
 function App() {
-  const [db, setDb] = useState(seed);
+  const [db, setDb] = useState(EMPTY);
   const [me, setMe] = useState(null);
+  const [ready, setReady] = useState(false);
   const [view, setView] = useState({ name: "home" });
   const [modal, setModal] = useState(null);
   const [toast, setToast] = useState("");
+  const meRef = useRef(null);
+  const [noStore] = useState(() => { try { localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); return false; } catch (e) { return true; } });
 
-  const say = (t) => { setToast(t); setTimeout(() => setToast(""), 2400); };
+  const say = (t) => { setToast(t); setTimeout(() => setToast(""), 2800); };
   const go = (name, params = {}) => { setView({ name, ...params }); window.scrollTo(0, 0); };
   const isAdmin = !!me && me.role === "admin";
+  const refresh = async () => setDb(await fetchAll(meRef.current && meRef.current.id));
+
+  /* ----- auth session ----- */
+  useEffect(() => {
+    const apply = async (session) => {
+      if (!session) { meRef.current = null; setMe(null); setDb(await fetchAll(null)); setReady(true); return; }
+      const { data: prof } = await sb.from("profiles").select("*").eq("id", session.user.id).maybeSingle();
+      const user = { id: session.user.id, email: session.user.email, name: (prof && prof.name) || session.user.email.split("@")[0], role: (prof && prof.role) || "user" };
+      meRef.current = user; setMe(user); setDb(await fetchAll(user.id)); setReady(true);
+    };
+    sb.auth.getSession().then(({ data }) => apply(data.session));
+    const { data: sub } = sb.auth.onAuthStateChange((evt, session) => {
+      if (evt === "SIGNED_OUT") setTimeout(() => apply(null), 0);
+      if (evt === "SIGNED_IN" && (!meRef.current || meRef.current.id !== session.user.id)) setTimeout(() => apply(session), 0);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  /* ----- realtime: course unlocks the moment admin approves ----- */
+  useEffect(() => {
+    if (!me) return;
+    const ch = sb.channel("purchases-" + me.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "purchases" }, (payload) => {
+        if (payload.new && payload.new.user_id === me.id && payload.new.status === "approved") say("Payment approved. Your content is unlocked!");
+        refresh();
+      })
+      .subscribe();
+    return () => { sb.removeChannel(ch); };
+  }, [me && me.id]);
 
   const purchaseOf = (type, id) => me && db.purchases.find((p) => p.userId === me.id && p.itemType === type && p.itemId === id && p.status !== "rejected");
   const hasAccess = (type, item) => item.isFree || isAdmin || (purchaseOf(type, item.id) || {}).status === "approved";
@@ -252,19 +267,20 @@ function App() {
   };
 
   const api = {
-    db, setDb, me, setMe, view, go, say, modal, setModal, isAdmin, hasAccess, purchaseOf, buy,
-    login: (email, password) => {
-      const u = db.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.password === password);
-      if (!u) return "Wrong email or password.";
-      setMe(u); go("home"); say("Welcome back, " + u.name); return "";
+    db, setDb, me, view, go, say, modal, setModal, isAdmin, hasAccess, purchaseOf, buy, refresh,
+    login: async (email, password) => {
+      const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) return error.message;
+      go("home"); say("Welcome back"); return "";
     },
-    signup: (name, email, password) => {
+    signup: async (name, email, password) => {
       if (!name.trim() || !email.trim() || password.length < 6) return "Fill all fields. Password needs 6+ characters.";
-      if (db.users.some((x) => x.email.toLowerCase() === email.trim().toLowerCase())) return "This email already has an account.";
-      const u = { id: uid("u"), name: name.trim(), email: email.trim(), password, role: "user" };
-      setDb((d) => ({ ...d, users: [...d.users, u] })); setMe(u); go("home"); say("Account created"); return "";
+      const { data, error } = await sb.auth.signUp({ email: email.trim(), password, options: { data: { name: name.trim() } } });
+      if (error) return error.message;
+      if (!data.session) return "CONFIRM";
+      go("home"); say("Account created"); return "";
     },
-    logout: () => { setMe(null); go("home"); },
+    logout: async () => { await sb.auth.signOut(); go("home"); },
   };
 
   const tabs = [["home", "Home"], ["browse", "Browse"], ["learning", "My learning"]];
@@ -285,13 +301,21 @@ function App() {
         </div>
       </header>
 
+      {noStore && (
+        <div className="wrap"><div className="sub" style={{ marginTop: 14, borderColor: "var(--danger)" }}>
+          <b style={{ color: "var(--danger)" }}>Login will not stay saved here.</b>
+          <div className="muted">This preview blocks browser storage, so refreshing logs you out. Open the file in Chrome, or host it online (Netlify, Vercel, GitHub Pages).</div>
+        </div></div>
+      )}
       <main className="wrap page">
-        {view.name === "home" && <Home />}
-        {view.name === "auth" && <Auth />}
-        {view.name === "browse" && <Browse key={view.cat || "all"} />}
-        {view.name === "course" && <CoursePage id={view.id} />}
-        {view.name === "learning" && <Learning />}
-        {view.name === "admin" && (isAdmin ? <Admin /> : <div className="empty">Only the admin can open this page.</div>)}
+        {!ready ? <div className="boot">Loading...</div> : <>
+          {view.name === "home" && <Home />}
+          {view.name === "auth" && <Auth />}
+          {view.name === "browse" && <Browse key={view.cat || "all"} />}
+          {view.name === "course" && <CoursePage id={view.id} />}
+          {view.name === "learning" && <Learning />}
+          {view.name === "admin" && (isAdmin ? <Admin /> : <div className="empty">Only the admin can open this page.</div>)}
+        </>}
       </main>
 
       <nav className="bot">
@@ -376,6 +400,7 @@ function Home() {
   const { db, go, me, isAdmin, setModal } = useApp();
   const waiting = db.purchases.filter((p) => p.status === "pending").length;
   const count = (id) => db.courses.filter((c) => c.category === id).length + (id === "hacking" ? db.commands.length : 0);
+  const free = db.courses.filter((c) => c.isFree).slice(0, 4);
   return (
     <>
       <section className="hero">
@@ -415,12 +440,15 @@ function Home() {
         </div>
       </section>
 
-      <section className="sec">
-        <h2>Free to start</h2>
-        <div className="grid">
-          {db.courses.filter((c) => c.isFree).slice(0, 4).map((c) => <CourseCard key={c.id} c={c} />)}
-        </div>
-      </section>
+      {free.length > 0 && (
+        <section className="sec">
+          <h2>Free to start</h2>
+          <div className="grid">{free.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+        </section>
+      )}
+      {db.courses.length === 0 && (
+        <div className="empty">{isAdmin ? "No courses yet. Tap Add course to publish your first one." : "Courses are coming soon."}</div>
+      )}
     </>
   );
 }
@@ -433,10 +461,15 @@ function Auth() {
   const [mode, setMode] = useState("login");
   const [f, setF] = useState({ name: "", email: "", password: "" });
   const [err, setErr] = useState("");
+  const [info, setInfo] = useState("");
+  const [busy, setBusy] = useState(false);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-  const submit = (e) => {
-    e.preventDefault();
-    setErr(mode === "login" ? login(f.email, f.password) : signup(f.name, f.email, f.password));
+  const submit = async (e) => {
+    e.preventDefault(); setBusy(true); setErr(""); setInfo("");
+    const r = mode === "login" ? await login(f.email, f.password) : await signup(f.name, f.email, f.password);
+    setBusy(false);
+    if (r === "CONFIRM") setInfo("Account created. Check your email to confirm, then log in.");
+    else setErr(r);
   };
   return (
     <div className="auth">
@@ -447,24 +480,24 @@ function Auth() {
         <div className="field"><label htmlFor="e">Email</label><input id="e" type="email" className="inp" value={f.email} onChange={set("email")} autoComplete="email" /></div>
         <div className="field"><label htmlFor="p">Password</label><input id="p" type="password" className="inp" value={f.password} onChange={set("password")} autoComplete={mode === "login" ? "current-password" : "new-password"} /></div>
         {err && <div className="err" role="alert">{err}</div>}
-        <button className="btn block" type="submit">{mode === "login" ? "Log in" : "Sign up"}</button>
+        {info && <div className="info" role="status">{info}</div>}
+        <button className="btn block" type="submit" disabled={busy}>{busy ? "Please wait..." : mode === "login" ? "Log in" : "Sign up"}</button>
       </form>
       <p className="muted" style={{ marginTop: 16, textAlign: "center" }}>
         {mode === "login" ? "New here? " : "Already have an account? "}
-        <button style={{ color: "var(--amber)", fontWeight: 600 }} onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(""); }}>
+        <button style={{ color: "var(--amber)", fontWeight: 600 }} onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(""); setInfo(""); }}>
           {mode === "login" ? "Create an account" : "Log in"}
         </button>
       </p>
-      <p className="muted" style={{ marginTop: 14, fontSize: 12.5, textAlign: "center" }}>Demo admin: praveen@admin.com / admin123</p>
     </div>
   );
 }
 
 /* ============================================================
-   BROWSE (Hacking has Courses + Commands)
+   BROWSE  (Hacking has Courses + Commands)
    ============================================================ */
 function Browse() {
-  const { db, view, go, isAdmin, setModal } = useApp();
+  const { db, view, isAdmin, setModal } = useApp();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState(view.cat || "all");
   const [tab, setTab] = useState("courses");
@@ -503,9 +536,13 @@ function Browse() {
 }
 
 function Commands() {
-  const { db, setDb, hasAccess, buy, say, purchaseOf, isAdmin, setModal } = useApp();
+  const { db, refresh, hasAccess, buy, say, purchaseOf, isAdmin, setModal } = useApp();
   const copy = (t) => { navigator.clipboard && navigator.clipboard.writeText(t); say("Command copied"); };
-  const del = (id) => { if (confirm("Delete this command?")) { setDb((d) => ({ ...d, commands: d.commands.filter((c) => c.id !== id) })); say("Deleted"); } };
+  const del = async (id) => {
+    if (!confirm("Delete this command?")) return;
+    const { error } = await sb.from("commands").delete().eq("id", id);
+    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  };
   return (
     <>
       {isAdmin && (
@@ -518,15 +555,16 @@ function Commands() {
       <div className="grid" style={{ marginTop: 6 }}>
         {db.commands.map((m) => {
           const open = hasAccess("command", m);
+          const body = db.bodies[m.id];
           const pend = (purchaseOf("command", m.id) || {}).status === "pending";
           return (
             <div className="cmd" key={m.id}>
               <div className="row sp"><h3 style={{ fontSize: 17 }}>{m.title}</h3><PriceTag item={m} owned={open} /></div>
               <p className="muted">{m.desc}</p>
-              <pre className={"code" + (open ? "" : " masked")}>{open ? m.cmd : "sudo ••••••••••• ••••••• ••••"}</pre>
+              <pre className={"code" + (open ? "" : " masked")}>{open ? (body !== undefined ? body : "Loading...") : "sudo ••••••••••• ••••••• ••••"}</pre>
               <div className="row sp wrapx">
                 {open
-                  ? <button className="btn ghost sm" onClick={() => copy(m.cmd)}>Copy command</button>
+                  ? <button className="btn ghost sm" onClick={() => copy(body || "")}>Copy command</button>
                   : pend
                     ? <span className="muted">Payment under review</span>
                     : <button className="btn sm" onClick={() => buy("command", m)}>Unlock for ₹{m.price}</button>}
@@ -548,25 +586,53 @@ function Commands() {
 /* ============================================================
    COURSE PAGE
    ============================================================ */
+function useVideo(lessonId, canPlay) {
+  const [src, setSrc] = useState(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    let off = false;
+    setSrc(null);
+    if (!lessonId || !canPlay) { setLoading(false); return; }
+    setLoading(true);
+    (async () => {
+      const { data } = await sb.from("lesson_videos").select("video_url").eq("lesson_id", lessonId).maybeSingle();
+      let u = data && data.video_url;
+      if (u && u.startsWith("storage:")) {
+        const r = await sb.storage.from("videos").createSignedUrl(u.slice(8), 7200);
+        u = r.data ? r.data.signedUrl : null;
+      }
+      if (!off) { setSrc(u || null); setLoading(false); }
+    })();
+    return () => { off = true; };
+  }, [lessonId, canPlay]);
+  return { src, loading };
+}
+
 function CoursePage({ id }) {
-  const { db, setDb, me, hasAccess, buy, purchaseOf, go, isAdmin, setModal } = useApp();
+  const { db, setDb, me, hasAccess, buy, purchaseOf, go, isAdmin, setModal, say } = useApp();
   const c = db.courses.find((x) => x.id === id);
   const [lid, setLid] = useState(c && c.lessons[0] && c.lessons[0].id);
+  const lesson = c ? (c.lessons.find((l) => l.id === lid) || c.lessons[0]) : null;
+  const owned = c ? hasAccess("course", c) : false;
+  const canPlay = !!(lesson && (owned || lesson.preview));
+  const { src, loading } = useVideo(lesson && lesson.id, canPlay);
+
   if (!c) return <div className="empty">This course was removed. <button style={{ color: "var(--amber)" }} onClick={() => go("browse")}>Back to browse</button></div>;
 
-  const owned = hasAccess("course", c);
   const pend = (purchaseOf("course", c.id) || {}).status === "pending";
-  const lesson = c.lessons.find((l) => l.id === lid) || c.lessons[0];
-  const canPlay = lesson && (owned || lesson.preview);
-  const done = (l) => me && db.progress[me.id + ":" + l.id];
+  const done = (l) => !!db.progress[l.id];
   const doneCount = c.lessons.filter(done).length;
   const pct = c.lessons.length ? Math.round((doneCount / c.lessons.length) * 100) : 0;
-  const media = lesson && embedUrl(lesson.url);
+  const media = embedUrl(src);
 
-  const toggleDone = () => {
-    if (!me) return;
-    const k = me.id + ":" + lesson.id;
-    setDb((d) => { const p = { ...d.progress }; p[k] ? delete p[k] : (p[k] = true); return { ...d, progress: p }; });
+  const toggleDone = async () => {
+    if (!me || !lesson) return;
+    const was = done(lesson);
+    setDb((d) => { const p = { ...d.progress }; was ? delete p[lesson.id] : (p[lesson.id] = true); return { ...d, progress: p }; });
+    const r = was
+      ? await sb.from("progress").delete().eq("user_id", me.id).eq("lesson_id", lesson.id)
+      : await sb.from("progress").insert({ user_id: me.id, lesson_id: lesson.id });
+    if (r.error) say(r.error.message);
   };
 
   return (
@@ -581,11 +647,12 @@ function CoursePage({ id }) {
               <span className="muted">Buy the course to watch all {c.lessons.length} lessons.</span>
               {pend ? <span className="tag">Payment under review</span> : <button className="btn" onClick={() => buy("course", c)}>Unlock for ₹{c.price}</button>}
             </div>
-          ) : media ? (
+          ) : loading ? <span className="muted">Loading video...</span>
+          : media ? (
             media.type === "iframe"
               ? <iframe src={media.src} title={lesson.title} allowFullScreen />
-              : <video src={media.src} controls />
-          ) : <div className="lock-box"><span className="muted">The admin has not added a video link for this lesson yet.</span></div>}
+              : <video src={media.src} controls controlsList="nodownload" />
+          ) : <div className="lock-box"><span className="muted">The admin has not added a video for this lesson yet.</span></div>}
       </div>
 
       <div className="row sp wrapx" style={{ margin: "16px 0 6px" }}>
@@ -604,7 +671,7 @@ function CoursePage({ id }) {
         <button className="btn ghost sm" onClick={toggleDone} style={{ marginBottom: 14 }}>{done(lesson) ? "Mark as not done" : "Mark lesson as done"}</button>
       )}
 
-      {owned && me && (
+      {owned && me && c.lessons.length > 0 && (
         <div style={{ marginBottom: 16 }}>
           <div className="row sp muted" style={{ marginBottom: 6 }}><span>Your progress</span><span>{doneCount} of {c.lessons.length} done</span></div>
           <div className="bar"><i style={{ width: pct + "%" }} /></div>
@@ -614,7 +681,7 @@ function CoursePage({ id }) {
       {!owned && !pend && (
         <button className="btn block" style={{ marginBottom: 16 }} onClick={() => buy("course", c)}>Buy this course for ₹{c.price}</button>
       )}
-      {!owned && pend && <div className="sub muted" style={{ textAlign: "center" }}>Your payment is being checked. The course opens once Praveen approves it.</div>}
+      {!owned && pend && <div className="sub muted" style={{ textAlign: "center" }}>Your payment is being checked. The course opens by itself once Praveen approves it.</div>}
 
       <h2 style={{ fontSize: 20, margin: "10px 0 12px" }}>Lessons</h2>
       <div style={{ display: "grid", gap: 8 }}>
@@ -625,7 +692,7 @@ function CoursePage({ id }) {
               <span className="n">{i + 1}</span>
               <span className="t">{l.title}</span>
               {done(l) && <span className="tag free">Done</span>}
-              {!ok && <span className="tag lock">Locked</span>}
+              {!ok && <span className="tag">Locked</span>}
               {!owned && l.preview && <span className="tag free">Free preview</span>}
               <span className="muted">{l.duration}</span>
             </button>
@@ -656,34 +723,40 @@ function Learning() {
 }
 
 /* ============================================================
-   BUY MODAL  (manual QR payment + admin approval)
+   BUY MODAL  (QR payment, then admin approval)
    ============================================================ */
 function BuyModal({ type, item }) {
-  const { db, setDb, me, setModal, say } = useApp();
+  const { db, me, setModal, say, refresh } = useApp();
   const [utr, setUtr] = useState("");
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
   const s = db.settings;
-  const submit = () => {
+  const submit = async () => {
     if (utr.trim().length < 6) { setErr("Enter the UTR / transaction ID from your payment app."); return; }
-    const p = { id: uid("p"), userId: me.id, userName: me.name, itemType: type, itemId: item.id, itemTitle: item.title, amount: item.price, utr: utr.trim(), status: "pending", at: new Date().toLocaleString() };
-    setDb((d) => ({ ...d, purchases: [p, ...d.purchases] }));
-    setModal(null); say("Payment sent for approval");
+    setBusy(true);
+    const { error } = await sb.from("purchases").insert({
+      user_id: me.id, user_name: me.name, item_type: type, item_id: item.id, item_title: item.title,
+      amount: item.price, utr: utr.trim(), status: "pending",
+    });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    await refresh(); setModal(null); say("Payment sent for approval");
   };
   return (
     <div className="ov" onClick={() => setModal(null)}>
       <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <h2 style={{ fontSize: 22 }}>{item.title}</h2>
         <ol className="steps"><li>Scan the QR and pay ₹{item.price}</li><li>Copy the UTR / transaction ID from your payment app</li><li>Enter it below and tap I have paid</li></ol>
-        <div className="qr">{s.qrUrl ? <img src={s.qrUrl} alt="Payment QR code" /> : "Praveen's QR code appears here. Add it in Admin, Settings."}</div>
-        <p style={{ textAlign: "center", fontFamily: "var(--mono)", marginBottom: 16 }}>{s.upi}</p>
+        <div className="qr">{s.qrUrl ? <img src={s.qrUrl} alt="Payment QR code" /> : "QR code not added yet. Ask the admin."}</div>
+        {s.upi && <p style={{ textAlign: "center", fontFamily: "var(--mono)", marginBottom: 16 }}>{s.upi}</p>}
         <div className="field">
-          <label htmlFor="utr">After paying, enter the UTR / transaction ID</label>
-          <input id="utr" className="inp" value={utr} onChange={(e) => setUtr(e.target.value)} placeholder="e.g. 4081 2345 6789" />
+          <label htmlFor="utr">UTR / transaction ID</label>
+          <input id="utr" className="inp" value={utr} onChange={(e) => setUtr(e.target.value)} placeholder="e.g. 408123456789" />
         </div>
         {err && <div className="err" role="alert">{err}</div>}
         <div className="row">
           <button className="btn ghost" onClick={() => setModal(null)}>Cancel</button>
-          <button className="btn" style={{ flex: 1 }} onClick={submit}>I have paid</button>
+          <button className="btn" style={{ flex: 1 }} onClick={submit} disabled={busy}>{busy ? "Sending..." : "I have paid"}</button>
         </div>
       </div>
     </div>
@@ -694,13 +767,25 @@ function BuyModal({ type, item }) {
    ADMIN
    ============================================================ */
 function Admin() {
-  const { db, setDb, setModal, say } = useApp();
+  const { db, setModal, say, refresh } = useApp();
   const [tab, setTab] = useState("courses");
   const pending = db.purchases.filter((p) => p.status === "pending").length;
-  const setStatus = (id, status) => { setDb((d) => ({ ...d, purchases: d.purchases.map((p) => p.id === id ? { ...p, status } : p) })); say(status === "approved" ? "Approved. Course unlocked." : "Rejected"); };
-  const delCourse = (id) => { if (confirm("Delete this course?")) { setDb((d) => ({ ...d, courses: d.courses.filter((c) => c.id !== id) })); say("Deleted"); } };
-  const delCmd = (id) => { if (confirm("Delete this command?")) { setDb((d) => ({ ...d, commands: d.commands.filter((c) => c.id !== id) })); say("Deleted"); } };
-  const saveSet = (k) => (e) => setDb((d) => ({ ...d, settings: { ...d.settings, [k]: e.target.value } }));
+
+  const setStatus = async (id, status) => {
+    const { error } = await sb.from("purchases").update({ status }).eq("id", id);
+    if (error) { say(error.message); return; }
+    say(status === "approved" ? "Approved. Course unlocked." : "Rejected"); refresh();
+  };
+  const delCourse = async (id) => {
+    if (!confirm("Delete this course and all its lessons?")) return;
+    const { error } = await sb.from("courses").delete().eq("id", id);
+    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  };
+  const delCmd = async (id) => {
+    if (!confirm("Delete this command?")) return;
+    const { error } = await sb.from("commands").delete().eq("id", id);
+    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  };
 
   return (
     <>
@@ -713,6 +798,7 @@ function Admin() {
       {tab === "courses" && (
         <>
           <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "course", course: null })}>Add course</button>
+          {db.courses.length === 0 && <div className="empty">No courses yet.</div>}
           {db.courses.map((c) => (
             <div className="item" key={c.id}>
               <div style={{ minWidth: 0 }}>
@@ -731,6 +817,7 @@ function Admin() {
       {tab === "commands" && (
         <>
           <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "command", command: null })}>Add command</button>
+          {db.commands.length === 0 && <div className="empty">No commands yet.</div>}
           {db.commands.map((m) => (
             <div className="item" key={m.id}>
               <div style={{ minWidth: 0 }}>
@@ -765,19 +852,43 @@ function Admin() {
         ))
       )}
 
-      {tab === "settings" && (
-        <div style={{ maxWidth: 460 }}>
-          <div className="field"><label htmlFor="sn">App name</label><input id="sn" className="inp" value={db.settings.siteName} onChange={saveSet("siteName")} /></div>
-          <div className="field"><label htmlFor="su">UPI ID</label><input id="su" className="inp" value={db.settings.upi} onChange={saveSet("upi")} /></div>
-          <div className="field"><label htmlFor="sq">QR code image link</label><input id="sq" className="inp" value={db.settings.qrUrl} onChange={saveSet("qrUrl")} placeholder="https://..." /></div>
-          <p className="muted">Paste a link to your payment QR image. Later it will be uploaded to Supabase Storage.</p>
-        </div>
-      )}
+      {tab === "settings" && <SettingsTab />}
     </>
   );
 }
 
-/* ---------- Free / Paid control reused in both forms ---------- */
+function SettingsTab() {
+  const { db, say, refresh } = useApp();
+  const [s, setS] = useState(db.settings);
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    const { error } = await sb.from("settings").update({ site_name: s.siteName, upi: s.upi, qr_url: s.qrUrl }).eq("id", 1);
+    setBusy(false);
+    if (error) say(error.message); else { say("Settings saved"); refresh(); }
+  };
+  const upQr = async (file) => {
+    if (!file) return;
+    const path = "qr/" + Date.now() + "-" + safeName(file.name);
+    const up = await sb.storage.from("public-assets").upload(path, file);
+    if (up.error) { say(up.error.message); return; }
+    const { data } = sb.storage.from("public-assets").getPublicUrl(path);
+    setS((x) => ({ ...x, qrUrl: data.publicUrl })); say("QR uploaded. Tap Save settings.");
+  };
+  return (
+    <div style={{ maxWidth: 460 }}>
+      <div className="field"><label htmlFor="sn">App name</label><input id="sn" className="inp" value={s.siteName} onChange={(e) => setS({ ...s, siteName: e.target.value })} /></div>
+      <div className="field"><label htmlFor="su">UPI ID</label><input id="su" className="inp" value={s.upi} onChange={(e) => setS({ ...s, upi: e.target.value })} /></div>
+      <div className="field"><label>Payment QR code</label>
+        <input type="file" accept="image/*" onChange={(e) => upQr(e.target.files[0])} />
+        {s.qrUrl && <div className="qr" style={{ margin: "8px 0 0" }}><img src={s.qrUrl} alt="QR preview" /></div>}
+      </div>
+      <button className="btn" onClick={save} disabled={busy}>{busy ? "Saving..." : "Save settings"}</button>
+    </div>
+  );
+}
+
+/* ---------- Free / Paid control used in both forms ---------- */
 function PriceField({ f, setF }) {
   return (
     <div className="field">
@@ -794,16 +905,60 @@ function PriceField({ f, setF }) {
 }
 
 function CourseForm({ course }) {
-  const { setDb, setModal, say } = useApp();
-  const [f, setF] = useState(course ? { ...course, lessons: course.lessons.map((l) => ({ ...l })) } : { title: "", desc: "", category: "hacking", isFree: false, price: 499, lessons: [] });
+  const { setModal, say, refresh } = useApp();
+  const [f, setF] = useState(course
+    ? { ...course, lessons: course.lessons.map((l) => ({ ...l, url: "" })) }
+    : { title: "", desc: "", category: "hacking", isFree: false, price: 499, lessons: [] });
+  const [loadingUrls, setLoadingUrls] = useState(!!course);
+  const [uploading, setUploading] = useState(-1);
+  const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
-  const upL = (i, k, v) => setF({ ...f, lessons: f.lessons.map((l, j) => j === i ? { ...l, [k]: v } : l) });
-  const save = () => {
-    if (!f.title.trim()) { setErr("Add a course title."); return; }
-    const out = { ...f, id: f.id || uid("c"), price: f.isFree ? 0 : Number(f.price) || 0 };
-    setDb((d) => ({ ...d, courses: course ? d.courses.map((c) => c.id === out.id ? out : c) : [out, ...d.courses] }));
-    setModal(null); say(course ? "Course saved" : "Course added");
+
+  useEffect(() => {
+    if (!course) return;
+    (async () => {
+      const ids = course.lessons.map((l) => l.id);
+      if (ids.length) {
+        const { data } = await sb.from("lesson_videos").select("*").in("lesson_id", ids);
+        const m = {}; (data || []).forEach((r) => (m[r.lesson_id] = r.video_url));
+        setF((x) => ({ ...x, lessons: x.lessons.map((l) => ({ ...l, url: m[l.id] || "" })) }));
+      }
+      setLoadingUrls(false);
+    })();
+  }, []);
+
+  const upL = (i, k, v) => setF((x) => ({ ...x, lessons: x.lessons.map((l, j) => (j === i ? { ...l, [k]: v } : l)) }));
+
+  const uploadVideo = async (i, file) => {
+    if (!file) return;
+    setUploading(i);
+    const path = f.lessons[i].id + "/" + Date.now() + "-" + safeName(file.name);
+    const { error } = await sb.storage.from("videos").upload(path, file);
+    setUploading(-1);
+    if (error) { say(error.message); return; }
+    upL(i, "url", "storage:" + path); say("Video uploaded");
   };
+
+  const save = async () => {
+    if (!f.title.trim()) { setErr("Add a course title."); return; }
+    setSaving(true); setErr("");
+    try {
+      const id = f.id || newId();
+      let r = await sb.from("courses").upsert({ id, category: f.category, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0 });
+      if (r.error) throw r.error;
+      const lessons = f.lessons.map((l, i) => ({ id: l.id, course_id: id, title: l.title.trim() || "Lesson " + (i + 1), duration: l.duration || "", is_preview: !!l.preview, position: i }));
+      let dq = sb.from("lessons").delete().eq("course_id", id);
+      if (lessons.length) dq = dq.not("id", "in", "(" + lessons.map((l) => l.id).join(",") + ")");
+      r = await dq; if (r.error) throw r.error;
+      if (lessons.length) {
+        r = await sb.from("lessons").upsert(lessons); if (r.error) throw r.error;
+        r = await sb.from("lesson_videos").upsert(f.lessons.map((l) => ({ lesson_id: l.id, video_url: l.url || "" }))); if (r.error) throw r.error;
+      }
+      await refresh(); setModal(null); say(course ? "Course saved" : "Course added");
+    } catch (e) { setErr(e.message || "Could not save."); }
+    setSaving(false);
+  };
+
   return (
     <div className="ov" onClick={() => setModal(null)}>
       <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
@@ -818,37 +973,52 @@ function CourseForm({ course }) {
         <PriceField f={f} setF={setF} />
 
         <h3 style={{ fontSize: 17, margin: "6px 0 10px" }}>Lessons</h3>
+        {loadingUrls && <p className="muted" style={{ marginBottom: 10 }}>Loading video links...</p>}
         {f.lessons.map((l, i) => (
           <div className="sub" key={l.id}>
             <div className="field"><label>Lesson {i + 1} title</label><input className="inp" value={l.title} onChange={(e) => upL(i, "title", e.target.value)} /></div>
-            <div className="field"><label>Video link (YouTube or .mp4)</label><input className="inp" value={l.url} onChange={(e) => upL(i, "url", e.target.value)} placeholder="https://..." /></div>
-            <div className="field"><label>Or pick a video from your device (works for this session only)</label>
-              <input type="file" accept="video/*" onChange={(e) => { const file = e.target.files[0]; if (file) { upL(i, "url", URL.createObjectURL(file)); say("Video attached"); } }} /></div>
+            <div className="field"><label>Video link (YouTube or .mp4)</label>
+              <input className="inp" value={l.url.startsWith("storage:") ? "" : l.url} onChange={(e) => upL(i, "url", e.target.value)} placeholder={l.url.startsWith("storage:") ? "Uploaded video attached" : "https://..."} />
+            </div>
+            <div className="field"><label>Or upload a video file (max 50 MB on the free plan)</label>
+              <input type="file" accept="video/*" onChange={(e) => uploadVideo(i, e.target.files[0])} />
+              {uploading === i && <span className="muted">Uploading...</span>}
+              {l.url.startsWith("storage:") && uploading !== i && <span className="info" style={{ margin: 0 }}>Video uploaded</span>}
+            </div>
             <div className="row sp wrapx">
               <input className="inp" style={{ width: 110 }} value={l.duration} onChange={(e) => upL(i, "duration", e.target.value)} placeholder="mm:ss" aria-label="Duration" />
-              <label className="switch"><input type="checkbox" checked={l.preview} onChange={(e) => upL(i, "preview", e.target.checked)} />Free preview</label>
+              <label className="switch"><input type="checkbox" checked={!!l.preview} onChange={(e) => upL(i, "preview", e.target.checked)} />Free preview</label>
               <button className="btn danger sm" onClick={() => setF({ ...f, lessons: f.lessons.filter((_, j) => j !== i) })}>Remove</button>
             </div>
           </div>
         ))}
-        <button className="btn ghost sm" style={{ marginBottom: 16 }} onClick={() => setF({ ...f, lessons: [...f.lessons, { id: uid("l"), title: "", url: "", duration: "", preview: false }] })}>Add lesson</button>
+        <button className="btn ghost sm" style={{ marginBottom: 16 }} onClick={() => setF({ ...f, lessons: [...f.lessons, { id: newId(), title: "", url: "", duration: "", preview: false }] })}>Add lesson</button>
 
         {err && <div className="err" role="alert">{err}</div>}
-        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save}>Save course</button></div>
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save} disabled={saving || loadingUrls || uploading >= 0}>{saving ? "Saving..." : "Save course"}</button></div>
       </div>
     </div>
   );
 }
 
 function CommandForm({ command }) {
-  const { setDb, setModal, say } = useApp();
-  const [f, setF] = useState(command || { title: "", cmd: "", desc: "", isFree: true, price: 99 });
+  const { db, setModal, say, refresh } = useApp();
+  const [f, setF] = useState(command
+    ? { ...command, cmd: db.bodies[command.id] || "" }
+    : { title: "", cmd: "", desc: "", isFree: true, price: 99 });
+  const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
-  const save = () => {
+  const save = async () => {
     if (!f.title.trim() || !f.cmd.trim()) { setErr("Add a title and the command."); return; }
-    const out = { ...f, id: f.id || uid("m"), price: f.isFree ? 0 : Number(f.price) || 0 };
-    setDb((d) => ({ ...d, commands: command ? d.commands.map((c) => c.id === out.id ? out : c) : [out, ...d.commands] }));
-    setModal(null); say(command ? "Command saved" : "Command added");
+    setSaving(true); setErr("");
+    try {
+      const id = f.id || newId();
+      let r = await sb.from("commands").upsert({ id, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0 });
+      if (r.error) throw r.error;
+      r = await sb.from("command_bodies").upsert({ command_id: id, body: f.cmd }); if (r.error) throw r.error;
+      await refresh(); setModal(null); say(command ? "Command saved" : "Command added");
+    } catch (e) { setErr(e.message || "Could not save."); }
+    setSaving(false);
   };
   return (
     <div className="ov" onClick={() => setModal(null)}>
@@ -859,7 +1029,7 @@ function CommandForm({ command }) {
         <div className="field"><label htmlFor="md">What it does</label><textarea id="md" className="inp" value={f.desc} onChange={(e) => setF({ ...f, desc: e.target.value })} /></div>
         <PriceField f={f} setF={setF} />
         {err && <div className="err" role="alert">{err}</div>}
-        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save}>Save command</button></div>
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save} disabled={saving}>{saving ? "Saving..." : "Save command"}</button></div>
       </div>
     </div>
   );
