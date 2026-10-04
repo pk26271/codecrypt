@@ -20,6 +20,7 @@
   --head:'Bricolage Grotesque',system-ui,sans-serif;
   --body:'IBM Plex Sans',system-ui,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -30,55 +31,76 @@ h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
 .wrap{max-width:980px;margin:0 auto;padding:0 18px}
 .page{padding:20px 0 110px}
 
+/* ---------- motion ---------- */
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes sheetup{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translate(-50%,10px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes wordin{from{opacity:0;transform:translateY(60%)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.pagein{animation:fadein .35s var(--ease) both}
+.stagger>*{animation:rise .5s var(--ease) both;animation-delay:calc(var(--i,0) * 55ms)}
+.rev{animation:rise .6s var(--ease) both;animation-delay:calc(var(--i,0) * 110ms)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- top / nav ---------- */
 .top{position:sticky;top:0;z-index:20;background:rgba(8,22,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
 .brand{font-family:var(--head);font-weight:800;font-size:19px;display:flex;align-items:center;gap:9px;color:var(--text)}
 .brand i{font-style:normal;font-family:var(--mono);background:var(--amber);color:var(--amber-ink);width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:13px;font-weight:500}
 .nav-d{display:none;gap:4px}
-.nav-d button,.bot button{padding:8px 14px;border-radius:9px;color:var(--muted);font-weight:500}
+.nav-d button,.bot button{padding:8px 14px;border-radius:9px;color:var(--muted);font-weight:500;transition:color .2s,background .2s}
 .nav-d button.on,.bot button.on{color:var(--amber);background:var(--surface)}
-.bot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
-.bot button{flex:1;font-size:12.5px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.bot button{flex:1;font-size:12px;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:3px}
 .bot svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:760px){.nav-d{display:flex}.bot{display:none}.page{padding-bottom:50px}}
 
-.btn{padding:11px 18px;border-radius:10px;font-weight:600;background:var(--amber);color:var(--amber-ink);transition:transform .12s}
+/* ---------- buttons ---------- */
+.btn{padding:11px 18px;border-radius:10px;font-weight:600;background:var(--amber);color:var(--amber-ink);transition:transform .15s var(--ease),filter .2s}
+.btn:hover{filter:brightness(1.07)}
 .btn:active{transform:scale(.97)}
 .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--amber)}
 .btn.sm{padding:7px 12px;font-size:14px;border-radius:8px}
 .btn.danger{background:transparent;color:var(--danger);border:1px solid #4a2a2a}
 .btn.block{width:100%}
 .btn:disabled{opacity:.5;cursor:default}
 
+/* ---------- hero ---------- */
 .hero{padding:26px 0 8px}
-.hero h1{font-size:clamp(30px,7vw,52px);font-weight:800;max-width:14ch}
-.hero p{color:var(--muted);margin:12px 0 18px;max-width:46ch}
+.hero h1{font-size:clamp(34px,8vw,58px);font-weight:800;max-width:14ch}
+.hero h1 .l{display:block;overflow:hidden;padding-bottom:.08em}
+.rot{display:inline-block;position:relative;animation:wordin .5s var(--ease) both}
+.rot::after{content:"";position:absolute;left:0;right:0;bottom:-.02em;height:.08em;background:var(--amber);transform-origin:left;animation:grow .5s .15s var(--ease) both}
+.hero p{color:var(--muted);margin:14px 0 18px;max-width:46ch}
 .term{background:#050E11;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:13.5px;min-height:128px;color:#BFD3CF;overflow:hidden}
 .term .p{color:var(--amber)}
 .term .o{color:var(--muted)}
 .cursor{display:inline-block;width:8px;height:15px;background:var(--amber);vertical-align:-2px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-@media(prefers-reduced-motion:reduce){.cursor{animation:none}}
-.stats{display:flex;gap:22px;margin-top:16px;flex-wrap:wrap}
+.stats{display:flex;gap:26px;margin-top:18px;flex-wrap:wrap}
 .stats div{display:flex;flex-direction:column}
-.stats strong{font-family:var(--head);font-size:24px}
+.stats strong{font-family:var(--head);font-size:26px;font-variant-numeric:tabular-nums}
 .stats span{color:var(--muted);font-size:13px}
 
+/* ---------- sections / grids ---------- */
 .sec{margin-top:30px}
 .sec h2{font-size:22px;margin-bottom:14px}
 .grid{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(min-width:760px){.cats{grid-template-columns:repeat(3,1fr)}}
-.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .15s;color:var(--text)}
-.cat:hover{border-color:var(--amber)}
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s var(--ease);color:var(--text)}
+.cat:hover{border-color:var(--amber);transform:translateY(-2px)}
 .cat.big{grid-column:span 2;background:linear-gradient(160deg,var(--surface2),var(--surface))}
 @media(min-width:760px){.cat.big{grid-column:span 1}}
-.glyph{font-family:var(--mono);font-size:14px;width:42px;height:42px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;color:var(--amber)}
+.glyph{font-family:var(--mono);font-size:14px;min-width:42px;height:42px;padding:0 6px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;color:var(--amber);align-self:flex-start}
 .cat b{font-family:var(--head);font-size:17px}
 .cat span.s{color:var(--muted);font-size:13px}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;display:flex;flex-direction:column;color:var(--text)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;display:flex;flex-direction:column;color:var(--text);transition:border-color .2s,transform .2s var(--ease)}
+.card:hover{border-color:var(--amber);transform:translateY(-2px)}
 .card .thumb{height:92px;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px;font-family:var(--mono);color:var(--amber);font-size:22px;border-bottom:1px solid var(--line)}
 .card .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .card h3{font-size:17px}
@@ -92,32 +114,50 @@ h1,h2,h3{font-family:var(--head);line-height:1.15;letter-spacing:-0.01em}
 
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 -18px;padding-left:18px;padding-right:18px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{padding:8px 15px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:500}
+.chip{padding:8px 15px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-weight:500;transition:background .2s,color .2s,border-color .2s}
 .chip.on{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;margin:12px 0}
-.seg button{padding:8px 18px;border-radius:8px;color:var(--muted);font-weight:500;white-space:nowrap}
+.seg button{padding:8px 18px;border-radius:8px;color:var(--muted);font-weight:500;white-space:nowrap;transition:background .2s,color .2s}
 .seg button.on{background:var(--amber);color:var(--amber-ink)}
 .search{position:relative;margin:0 0 12px}
 .search input{padding-left:40px}
 .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
 
-.player{aspect-ratio:16/9;background:#050E11;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;place-items:center;text-align:center;color:var(--muted)}
-.player iframe,.player video{width:100%;height:100%;border:0}
-.lock-box{padding:20px;display:flex;flex-direction:column;gap:12px;align-items:center}
-.lesson{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;color:var(--text)}
+/* ---------- video player (fits any screen) ---------- */
+.player{position:relative;width:100%;aspect-ratio:16/9;max-height:78vh;margin:0 auto;background:#000;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.player iframe,.player video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain}
+.player .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;overflow:auto;color:var(--muted);background:var(--surface)}
+.player:fullscreen,.player:-webkit-full-screen{max-width:none!important;max-height:none!important;aspect-ratio:auto!important;width:100vw;height:100vh;border:0;border-radius:0}
+.lock-box{display:flex;flex-direction:column;gap:8px;align-items:center;margin:auto}
+.lesson{width:100%;display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-align:left;color:var(--text);transition:border-color .2s}
 .lesson.on{border-color:var(--amber)}
 .lesson .n{font-family:var(--mono);width:28px;color:var(--muted);font-size:13px}
 .lesson .t{flex:1;font-weight:500}
 .bar{height:6px;background:var(--surface2);border-radius:9px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--amber)}
+.bar i{display:block;height:100%;background:var(--amber);transition:width .5s var(--ease)}
 
+/* ---------- commands ---------- */
 .cmd{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 pre.code{font-family:var(--mono);font-size:13.5px;background:#050E11;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;color:#D6E6E2;white-space:pre-wrap;word-break:break-word}
 pre.code.masked{filter:blur(5px);user-select:none}
 
+/* ---------- teachers ---------- */
+.avatar{border-radius:50%;object-fit:cover;background:var(--surface2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--head);font-weight:800;color:var(--amber);flex-shrink:0}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left;display:flex;gap:14px;align-items:center;color:var(--text);transition:border-color .2s,transform .2s var(--ease)}
+.tcard:hover{border-color:var(--amber);transform:translateY(-2px)}
+.tcard h3{font-size:18px}
+.tbig{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.facts{display:grid;gap:8px;margin:12px 0}
+.facts div{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.facts span{color:var(--muted);font-size:13px}
+.bio{white-space:pre-wrap;color:#C9D9D6;margin-bottom:14px}
+.teach-chip{display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--text);margin-bottom:12px;transition:border-color .2s}
+.teach-chip:hover{border-color:var(--amber)}
+
+/* ---------- forms ---------- */
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .field label{font-size:14px;color:var(--muted)}
-.inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%}
+.inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%;transition:border-color .2s}
 .inp:focus{border-color:var(--amber);outline:none}
 textarea.inp{min-height:84px;resize:vertical}
 .auth{max-width:400px;margin:24px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
@@ -125,14 +165,18 @@ textarea.inp{min-height:84px;resize:vertical}
 .info{color:var(--ok);font-size:14px;margin-bottom:12px}
 .switch{display:flex;align-items:center;gap:10px}
 .switch input{width:20px;height:20px;accent-color:var(--amber)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid transparent;transition:transform .15s var(--ease)}
+.sw.on{border-color:var(--text);transform:scale(1.12)}
 
-.ov{position:fixed;inset:0;background:rgba(2,8,10,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:20px}
+/* ---------- overlays ---------- */
+.ov{position:fixed;inset:0;background:rgba(2,8,10,.7);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s ease both}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;padding:20px;animation:sheetup .35s var(--ease) both}
 @media(min-width:600px){.ov{align-items:center}.sheet{border-radius:18px}}
 .qr{width:200px;height:200px;margin:6px auto 14px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;color:#333;font-size:13px;text-align:center;padding:12px}
 .qr img{width:100%;height:100%;object-fit:contain}
 .steps{margin:10px 0 14px 18px;color:var(--muted);display:grid;gap:4px;font-size:15px}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--amber);color:var(--amber-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--amber);color:var(--amber-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60;max-width:90vw;text-align:center;animation:pop .3s var(--ease) both}
 .item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap}
 .sub{border:1px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .empty{padding:30px 10px;text-align:center;color:var(--muted)}
@@ -154,30 +198,35 @@ const SUPABASE_URL = "https://jvuxiqeigkxxssjqzcxp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_t8LYGJ9UI_eh8FJWJk6bXA_MLhOcsXl";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const CATS = [
-  { id: "hacking",  hue: 28,  name: "Hacking",        glyph: "#!",  sub: "Courses and commands" },
+/* Fallback categories (used until the categories table exists). Live list comes from the database. */
+const DEFAULT_CATS = [
+  { id: "hacking",  hue: 28,  name: "Hacking",        glyph: "#!",  sub: "Courses and commands", hasCommands: true },
   { id: "frontend", hue: 200, name: "Frontend",       glyph: "</>", sub: "HTML, CSS, React" },
   { id: "backend",  hue: 262, name: "Backend",        glyph: "{ }", sub: "APIs and servers" },
   { id: "ai",       hue: 305, name: "AI",             glyph: "AI",  sub: "Models and prompts" },
   { id: "git",      hue: 8,   name: "Git and GitHub", glyph: "git", sub: "Version control" },
   { id: "database", hue: 150, name: "Database",       glyph: "SQL", sub: "Design and queries" },
 ];
-const catOf = (id) => CATS.find((c) => c.id === id) || CATS[0];
+let CATS = DEFAULT_CATS;
+const catOf = (id) => CATS.find((c) => c.id === id) || { id, name: id || "Other", glyph: "?", hue: 200, sub: "" };
+const HUES = [28, 8, 150, 200, 262, 305, 45, 340];
 
 const ICONS = {
   home: <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>,
   browse: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>,
+  teachers: <svg viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c3 2.5 9 2.5 12 0v-4.5"/></svg>,
   learning: <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>,
   admin: <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>,
 };
 
-const EMPTY = { courses: [], commands: [], bodies: {}, purchases: [], progress: {}, settings: { siteName: "CodeCrypt", upi: "", qrUrl: "" } };
+const EMPTY = { categories: DEFAULT_CATS, courses: [], commands: [], bodies: {}, teachers: [], purchases: [], progress: {}, settings: { siteName: "CodeCrypt", upi: "", qrUrl: "" } };
 
 const newId = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === "x" ? r : (r & 3) | 8).toString(16); }));
 const safeName = (n) => n.replace(/[^\w.\-]/g, "_");
+const slug = (n) => (n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "cat") + "-" + Math.random().toString(36).slice(2, 6);
 
 async function fetchAll(userId) {
-  const [c, l, m, b, s, p, g] = await Promise.all([
+  const [c, l, m, b, s, p, g, k, t] = await Promise.all([
     sb.from("courses").select("*").order("created_at", { ascending: false }),
     sb.from("lessons").select("*").order("position"),
     sb.from("commands").select("*").order("created_at", { ascending: false }),
@@ -185,18 +234,23 @@ async function fetchAll(userId) {
     sb.from("settings").select("*").eq("id", 1).maybeSingle(),
     userId ? sb.from("purchases").select("*").order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
     userId ? sb.from("progress").select("lesson_id").eq("user_id", userId) : Promise.resolve({ data: [] }),
+    sb.from("categories").select("*").order("position"),
+    sb.from("teachers").select("*").order("position").order("created_at"),
   ]);
   const lessons = l.data || [];
   const bodies = {}; (b.data || []).forEach((r) => (bodies[r.command_id] = r.body));
   const progress = {}; (g.data || []).forEach((r) => (progress[r.lesson_id] = true));
   const st = s.data;
+  const cats = (k.data || []).map((x) => ({ id: x.id, name: x.name, glyph: x.glyph, sub: x.sub, hue: x.hue, hasCommands: x.has_commands, position: x.position }));
   return {
+    categories: cats.length ? cats : DEFAULT_CATS,
     courses: (c.data || []).map((x) => ({
-      id: x.id, category: x.category, title: x.title, desc: x.description, isFree: x.is_free, price: x.price,
+      id: x.id, category: x.category, title: x.title, desc: x.description, isFree: x.is_free, price: x.price, teacherId: x.teacher_id || "",
       lessons: lessons.filter((y) => y.course_id === x.id).map((y) => ({ id: y.id, title: y.title, duration: y.duration, preview: y.is_preview })),
     })),
-    commands: (m.data || []).map((x) => ({ id: x.id, title: x.title, desc: x.description, isFree: x.is_free, price: x.price })),
+    commands: (m.data || []).map((x) => ({ id: x.id, category: x.category || "hacking", title: x.title, desc: x.description, isFree: x.is_free, price: x.price })),
     bodies,
+    teachers: (t.data || []).map((x) => ({ id: x.id, name: x.name, subject: x.subject, qualification: x.qualification, experience: x.experience, bio: x.bio, photo: x.photo_url, link: x.link })),
     purchases: (p.data || []).map((x) => ({ id: x.id, userId: x.user_id, userName: x.user_name, itemType: x.item_type, itemId: x.item_id, itemTitle: x.item_title, amount: x.amount, utr: x.utr, status: x.status, at: new Date(x.created_at).toLocaleString() })),
     progress,
     settings: st ? { siteName: st.site_name, upi: st.upi, qrUrl: st.qr_url } : EMPTY.settings,
@@ -206,7 +260,8 @@ async function fetchAll(userId) {
 const embedUrl = (u) => {
   if (!u) return null;
   const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  return m ? { type: "iframe", src: "https://www.youtube.com/embed/" + m[1] } : { type: "video", src: u };
+  if (m) return { type: "iframe", src: "https://www.youtube.com/embed/" + m[1] + "?playsinline=1&rel=0", ar: /shorts\//.test(u) ? 9 / 16 : 16 / 9 };
+  return { type: "video", src: u };
 };
 
 const Ctx = createContext(null);
@@ -225,12 +280,13 @@ function App() {
   const meRef = useRef(null);
   const [noStore] = useState(() => { try { localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); return false; } catch (e) { return true; } });
 
+  CATS = db.categories && db.categories.length ? db.categories : DEFAULT_CATS;
+
   const say = (t) => { setToast(t); setTimeout(() => setToast(""), 2800); };
   const go = (name, params = {}) => { setView({ name, ...params }); window.scrollTo(0, 0); };
   const isAdmin = !!me && me.role === "admin";
   const refresh = async () => setDb(await fetchAll(meRef.current && meRef.current.id));
 
-  /* ----- auth session ----- */
   useEffect(() => {
     const apply = async (session) => {
       if (!session) { meRef.current = null; setMe(null); setDb(await fetchAll(null)); setReady(true); return; }
@@ -246,7 +302,6 @@ function App() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  /* ----- realtime: course unlocks the moment admin approves ----- */
   useEffect(() => {
     if (!me) return;
     const ch = sb.channel("purchases-" + me.id)
@@ -283,9 +338,10 @@ function App() {
     logout: async () => { await sb.auth.signOut(); go("home"); },
   };
 
-  const tabs = [["home", "Home"], ["browse", "Browse"], ["learning", "My learning"]];
+  const tabs = [["home", "Home"], ["browse", "Browse"], ["teachers", "Teachers"], ["learning", "My courses"]];
   if (isAdmin) tabs.push(["admin", "Admin"]);
   const active = view.name === "course" ? "browse" : view.name;
+  const routeKey = view.name + (view.id || "") + (view.cat || "");
 
   return (
     <Ctx.Provider value={api}>
@@ -307,15 +363,19 @@ function App() {
           <div className="muted">This preview blocks browser storage, so refreshing logs you out. Open the file in Chrome, or host it online (Netlify, Vercel, GitHub Pages).</div>
         </div></div>
       )}
+
       <main className="wrap page">
-        {!ready ? <div className="boot">Loading...</div> : <>
-          {view.name === "home" && <Home />}
-          {view.name === "auth" && <Auth />}
-          {view.name === "browse" && <Browse key={view.cat || "all"} />}
-          {view.name === "course" && <CoursePage id={view.id} />}
-          {view.name === "learning" && <Learning />}
-          {view.name === "admin" && (isAdmin ? <Admin /> : <div className="empty">Only the admin can open this page.</div>)}
-        </>}
+        {!ready ? <div className="boot">Loading...</div> : (
+          <div key={routeKey} className="pagein">
+            {view.name === "home" && <Home />}
+            {view.name === "auth" && <Auth />}
+            {view.name === "browse" && <Browse key={view.cat || "all"} />}
+            {view.name === "course" && <CoursePage id={view.id} />}
+            {view.name === "teachers" && <Teachers />}
+            {view.name === "learning" && <Learning />}
+            {view.name === "admin" && (isAdmin ? <Admin /> : <div className="empty">Only the admin can open this page.</div>)}
+          </div>
+        )}
       </main>
 
       <nav className="bot">
@@ -324,7 +384,10 @@ function App() {
 
       {modal && modal.kind === "buy" && <BuyModal type={modal.type} item={modal.item} />}
       {modal && modal.kind === "course" && <CourseForm course={modal.course} />}
-      {modal && modal.kind === "command" && <CommandForm command={modal.command} />}
+      {modal && modal.kind === "command" && <CommandForm command={modal.command} cat={modal.cat} />}
+      {modal && modal.kind === "teacher" && <TeacherModal teacher={modal.teacher} />}
+      {modal && modal.kind === "teacherForm" && <TeacherForm teacher={modal.teacher} />}
+      {modal && modal.kind === "category" && <CategoryForm category={modal.category} />}
       {toast && <div className="toast" role="status">{toast}</div>}
     </Ctx.Provider>
   );
@@ -339,6 +402,47 @@ function PriceTag({ item, owned }) {
   return <span className="tag paid">₹{item.price}</span>;
 }
 
+function Avatar({ t, size = 56 }) {
+  const st = { width: size, height: size, fontSize: size * 0.4 };
+  return t.photo
+    ? <img className="avatar" style={st} src={t.photo} alt={t.name} />
+    : <div className="avatar" style={st} aria-hidden="true">{(t.name || "?").trim().charAt(0).toUpperCase()}</div>;
+}
+
+const reducedMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function useCountUp(target, ms = 800) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (reducedMotion() || target === 0) { setV(target); return; }
+    let raf, start;
+    const step = (t) => {
+      if (!start) start = t;
+      const p = Math.min(1, (t - start) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return v;
+}
+
+function Stat({ n, label }) {
+  const v = useCountUp(n);
+  return <div><strong>{v}</strong><span>{label}</span></div>;
+}
+
+function Rotator({ words }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (words.length < 2 || reducedMotion()) return;
+    const t = setInterval(() => setI((x) => (x + 1) % words.length), 2300);
+    return () => clearInterval(t);
+  }, [words.length]);
+  return <span className="rot" key={i}>{words[i % words.length]}</span>;
+}
+
 function Typing() {
   const lines = [
     ["whoami", "student"],
@@ -346,10 +450,9 @@ function Typing() {
     ["unlock --course ethical-hacking", "payment verified. access granted."],
   ];
   const [n, setN] = useState(0);
-  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const total = lines.reduce((a, l) => a + l[0].length, 0);
   useEffect(() => {
-    if (reduce) { setN(total); return; }
+    if (reducedMotion()) { setN(total); return; }
     const t = setInterval(() => setN((x) => (x < total ? x + 1 : x)), 55);
     return () => clearInterval(t);
   }, []);
@@ -378,9 +481,10 @@ function CourseCard({ c }) {
   const { go, hasAccess, purchaseOf } = useApp();
   const owned = hasAccess("course", c);
   const pend = (purchaseOf("course", c.id) || {}).status === "pending";
+  const cat = catOf(c.category);
   return (
     <button className="card" onClick={() => go("course", { id: c.id })}>
-      <div className="thumb" style={{ background: "linear-gradient(135deg, hsl(" + catOf(c.category).hue + " 45% 18%), var(--surface2))" }}><span>{catOf(c.category).glyph}</span><span className="tag">{catOf(c.category).name}</span></div>
+      <div className="thumb" style={{ background: "linear-gradient(135deg, hsl(" + cat.hue + " 45% 18%), var(--surface2))" }}><span>{cat.glyph}</span><span className="tag">{cat.name}</span></div>
       <div className="body">
         <h3>{c.title}</h3>
         <p className="muted">{c.lessons.length} lessons</p>
@@ -399,22 +503,27 @@ function CourseCard({ c }) {
 function Home() {
   const { db, go, me, isAdmin, setModal } = useApp();
   const waiting = db.purchases.filter((p) => p.status === "pending").length;
-  const count = (id) => db.courses.filter((c) => c.category === id).length + (id === "hacking" ? db.commands.length : 0);
+  const count = (c) => db.courses.filter((x) => x.category === c.id).length + (c.hasCommands ? db.commands.filter((m) => m.category === c.id).length : 0);
   const free = db.courses.filter((c) => c.isFree).slice(0, 4);
+  const words = CATS.map((c) => c.name.split(" ")[0].toLowerCase());
   return (
     <>
       <section className="hero">
-        <h1>Learn tech by doing it.</h1>
-        <p>Hacking, web development, AI, Git and databases. Video lessons from Praveen. Free to start, pay only for the courses you want.</p>
-        <div className="row wrapx" style={{ marginBottom: 18 }}>
+        <h1>
+          <span className="l rev" style={{ "--i": 0 }}>Learn</span>
+          <span className="l rev" style={{ "--i": 1 }}><Rotator words={words} /></span>
+          <span className="l rev" style={{ "--i": 2 }}>by doing it.</span>
+        </h1>
+        <p className="rev" style={{ "--i": 3 }}>Hacking, web development, AI, Git and databases. Video lessons from Praveen. Free to start, pay only for the courses you want.</p>
+        <div className="row wrapx rev" style={{ marginBottom: 18, "--i": 4 }}>
           <button className="btn" onClick={() => go("browse")}>Browse courses</button>
           {!me && <button className="btn ghost" onClick={() => go("auth")}>Create account</button>}
         </div>
-        <Typing />
-        <div className="stats">
-          <div><strong>{db.courses.length}</strong><span>courses</span></div>
-          <div><strong>{db.commands.length}</strong><span>hacking commands</span></div>
-          <div><strong>{db.courses.filter((c) => c.isFree).length}</strong><span>free courses</span></div>
+        <div className="rev" style={{ "--i": 5 }}><Typing /></div>
+        <div className="stats rev" style={{ "--i": 6 }}>
+          <Stat n={db.courses.length} label="courses" />
+          <Stat n={db.commands.length} label="commands" />
+          <Stat n={db.teachers.length} label="teachers" />
         </div>
       </section>
 
@@ -423,18 +532,19 @@ function Home() {
           <b>Admin</b>
           <button className="btn sm" onClick={() => setModal({ kind: "course", course: null })}>Add course</button>
           <button className="btn ghost sm" onClick={() => setModal({ kind: "command", command: null })}>Add command</button>
+          <button className="btn ghost sm" onClick={() => setModal({ kind: "teacherForm", teacher: null })}>Add teacher</button>
           <button className="btn ghost sm" onClick={() => go("admin")}>Payments{waiting ? " (" + waiting + ")" : ""}</button>
         </div>
       )}
 
       <section className="sec">
         <h2>Pick a track</h2>
-        <div className="cats">
-          {CATS.map((c) => (
-            <button key={c.id} className={"cat" + (c.id === "hacking" ? " big" : "")} onClick={() => go("browse", { cat: c.id })}>
+        <div className="cats stagger">
+          {CATS.map((c, i) => (
+            <button key={c.id} style={{ "--i": i }} className={"cat" + (i === 0 ? " big" : "")} onClick={() => go("browse", { cat: c.id })}>
               <span className="glyph">{c.glyph}</span>
               <b>{c.name}</b>
-              <span className="s">{c.sub} · {count(c.id)} items</span>
+              <span className="s">{c.sub ? c.sub + " · " : ""}{count(c)} items</span>
             </button>
           ))}
         </div>
@@ -443,9 +553,17 @@ function Home() {
       {free.length > 0 && (
         <section className="sec">
           <h2>Free to start</h2>
-          <div className="grid">{free.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+          <div className="grid stagger">{free.map((c, i) => <div key={c.id} style={{ "--i": i, display: "flex" }}><div style={{ display: "flex", flex: 1 }}><CourseCard c={c} /></div></div>)}</div>
         </section>
       )}
+
+      {db.teachers.length > 0 && (
+        <section className="sec">
+          <div className="row sp"><h2>Your teachers</h2><button className="muted" onClick={() => go("teachers")}>See all</button></div>
+          <div className="grid stagger">{db.teachers.slice(0, 2).map((t, i) => <TeacherCard key={t.id} t={t} i={i} />)}</div>
+        </section>
+      )}
+
       {db.courses.length === 0 && (
         <div className="empty">{isAdmin ? "No courses yet. Tap Add course to publish your first one." : "Courses are coming soon."}</div>
       )}
@@ -494,20 +612,26 @@ function Auth() {
 }
 
 /* ============================================================
-   BROWSE  (Hacking has Courses + Commands)
+   BROWSE  (categories with a Commands section get 2 tabs)
    ============================================================ */
 function Browse() {
-  const { db, view, isAdmin, setModal } = useApp();
+  const { db, view, go, isAdmin, setModal } = useApp();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState(view.cat || "all");
   const [tab, setTab] = useState("courses");
+  const curCat = CATS.find((c) => c.id === cat);
   const courses = db.courses.filter((c) => (cat === "all" || c.category === cat) && c.title.toLowerCase().includes(q.trim().toLowerCase()));
-  const showTabs = cat === "hacking";
+  const showTabs = !!(curCat && curCat.hasCommands);
   return (
     <>
       <div className="row sp" style={{ marginBottom: 14 }}>
         <h2 style={{ fontSize: 28 }}>Browse</h2>
-        {isAdmin && <button className="btn sm" onClick={() => setModal({ kind: "course", course: null })}>Add course</button>}
+        {isAdmin && (
+          <div className="row">
+            <button className="btn ghost sm" onClick={() => go("admin", { tab: "categories" })}>Edit categories</button>
+            <button className="btn sm" onClick={() => setModal({ kind: "course", course: null })}>Add course</button>
+          </div>
+        )}
       </div>
       <div className="search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -527,16 +651,17 @@ function Browse() {
 
       {(!showTabs || tab === "courses") && (
         courses.length
-          ? <div className="grid" style={{ marginTop: 14 }}>{courses.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+          ? <div className="grid stagger" style={{ marginTop: 14 }}>{courses.map((c, i) => <div key={c.id} style={{ "--i": Math.min(i, 8), display: "flex" }}><div style={{ display: "flex", flex: 1 }}><CourseCard c={c} /></div></div>)}</div>
           : <div className="empty">{q ? "No course matches your search." : "No courses here yet."}</div>
       )}
-      {showTabs && tab === "commands" && <Commands />}
+      {showTabs && tab === "commands" && <Commands cat={cat} />}
     </>
   );
 }
 
-function Commands() {
+function Commands({ cat }) {
   const { db, refresh, hasAccess, buy, say, purchaseOf, isAdmin, setModal } = useApp();
+  const list = db.commands.filter((m) => m.category === cat);
   const copy = (t) => { navigator.clipboard && navigator.clipboard.writeText(t); say("Command copied"); };
   const del = async (id) => {
     if (!confirm("Delete this command?")) return;
@@ -548,17 +673,17 @@ function Commands() {
       {isAdmin && (
         <div className="adminbar">
           <b>Admin</b>
-          <button className="btn sm" onClick={() => setModal({ kind: "command", command: null })}>Write a new command</button>
+          <button className="btn sm" onClick={() => setModal({ kind: "command", command: null, cat })}>Write a new command</button>
         </div>
       )}
-      {!db.commands.length && <div className="empty">No commands added yet.</div>}
-      <div className="grid" style={{ marginTop: 6 }}>
-        {db.commands.map((m) => {
+      {!list.length && <div className="empty">No commands added yet.</div>}
+      <div className="grid stagger" style={{ marginTop: 6 }}>
+        {list.map((m, i) => {
           const open = hasAccess("command", m);
           const body = db.bodies[m.id];
           const pend = (purchaseOf("command", m.id) || {}).status === "pending";
           return (
-            <div className="cmd" key={m.id}>
+            <div className="cmd" key={m.id} style={{ "--i": Math.min(i, 8) }}>
               <div className="row sp"><h3 style={{ fontSize: 17 }}>{m.title}</h3><PriceTag item={m} owned={open} /></div>
               <p className="muted">{m.desc}</p>
               <pre className={"code" + (open ? "" : " masked")}>{open ? (body !== undefined ? body : "Loading...") : "sudo ••••••••••• ••••••• ••••"}</pre>
@@ -612,10 +737,13 @@ function CoursePage({ id }) {
   const { db, setDb, me, hasAccess, buy, purchaseOf, go, isAdmin, setModal, say } = useApp();
   const c = db.courses.find((x) => x.id === id);
   const [lid, setLid] = useState(c && c.lessons[0] && c.lessons[0].id);
+  const [ar, setAr] = useState(16 / 9);
+  const boxRef = useRef(null);
   const lesson = c ? (c.lessons.find((l) => l.id === lid) || c.lessons[0]) : null;
   const owned = c ? hasAccess("course", c) : false;
   const canPlay = !!(lesson && (owned || lesson.preview));
   const { src, loading } = useVideo(lesson && lesson.id, canPlay);
+  useEffect(() => { setAr(16 / 9); }, [lesson && lesson.id]);
 
   if (!c) return <div className="empty">This course was removed. <button style={{ color: "var(--amber)" }} onClick={() => go("browse")}>Back to browse</button></div>;
 
@@ -624,6 +752,8 @@ function CoursePage({ id }) {
   const doneCount = c.lessons.filter(done).length;
   const pct = c.lessons.length ? Math.round((doneCount / c.lessons.length) * 100) : 0;
   const media = embedUrl(src);
+  const ratio = media && media.type === "iframe" ? media.ar : ar;
+  const teacher = db.teachers.find((t) => t.id === c.teacherId);
 
   const toggleDone = async () => {
     if (!me || !lesson) return;
@@ -635,31 +765,53 @@ function CoursePage({ id }) {
     if (r.error) say(r.error.message);
   };
 
+  const goFull = async () => {
+    const el = boxRef.current; if (!el) return;
+    const v = el.querySelector("video");
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (v && v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+      if (ratio >= 1 && screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {});
+    } catch (e) {}
+  };
+
   return (
     <>
       <button className="muted" onClick={() => go("browse", { cat: c.category })} style={{ marginBottom: 10 }}>Back to {catOf(c.category).name}</button>
-      <div className="player">
-        {!lesson ? <div className="lock-box">No lessons added yet.</div>
+
+      <div ref={boxRef} className="player" style={{ aspectRatio: String(ratio), maxWidth: ratio < 1 ? "calc(78vh * " + ratio + ")" : "100%" }}>
+        {!lesson ? <div className="pc">No lessons added yet.</div>
           : !canPlay ? (
-            <div className="lock-box">
-              <div className="glyph">lock</div>
-              <b style={{ fontFamily: "var(--head)", fontSize: 18 }}>This lesson is locked</b>
+            <div className="pc"><div className="lock-box">
+              <div className="glyph" style={{ minWidth: 34, height: 34 }}>lock</div>
+              <b style={{ fontFamily: "var(--head)", fontSize: 17, color: "var(--text)" }}>This lesson is locked</b>
               <span className="muted">Buy the course to watch all {c.lessons.length} lessons.</span>
-              {pend ? <span className="tag">Payment under review</span> : <button className="btn" onClick={() => buy("course", c)}>Unlock for ₹{c.price}</button>}
-            </div>
-          ) : loading ? <span className="muted">Loading video...</span>
+              {pend ? <span className="tag">Payment under review</span> : <button className="btn sm" onClick={() => buy("course", c)}>Unlock for ₹{c.price}</button>}
+            </div></div>
+          ) : loading ? <div className="pc">Loading video...</div>
           : media ? (
             media.type === "iframe"
-              ? <iframe src={media.src} title={lesson.title} allowFullScreen />
-              : <video src={media.src} controls controlsList="nodownload" />
-          ) : <div className="lock-box"><span className="muted">The admin has not added a video for this lesson yet.</span></div>}
+              ? <iframe src={media.src} title={lesson.title} allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
+              : <video key={media.src} src={media.src} controls playsInline preload="metadata" controlsList="nodownload"
+                  onLoadedMetadata={(e) => { const v = e.target; if (v.videoWidth && v.videoHeight) setAr(v.videoWidth / v.videoHeight); }} />
+          ) : <div className="pc">The admin has not added a video for this lesson yet.</div>}
       </div>
+      {canPlay && media && <div className="row end" style={{ justifyContent: "flex-end", marginTop: 8 }}><button className="btn ghost sm" onClick={goFull}>Full screen</button></div>}
 
       <div className="row sp wrapx" style={{ margin: "16px 0 6px" }}>
         <h1 style={{ fontSize: 26 }}>{c.title}</h1>
         <PriceTag item={c} owned={owned} />
       </div>
       <p className="muted" style={{ marginBottom: 14 }}>{c.desc}</p>
+
+      {teacher && (
+        <button className="teach-chip" onClick={() => setModal({ kind: "teacher", teacher })}>
+          <Avatar t={teacher} size={34} />
+          <span style={{ textAlign: "left" }}><b style={{ fontSize: 14 }}>{teacher.name}</b><div className="muted" style={{ fontSize: 12.5 }}>{teacher.subject}</div></span>
+        </button>
+      )}
+
       {isAdmin && (
         <div className="adminbar">
           <b>Admin</b>
@@ -684,11 +836,11 @@ function CoursePage({ id }) {
       {!owned && pend && <div className="sub muted" style={{ textAlign: "center" }}>Your payment is being checked. The course opens by itself once Praveen approves it.</div>}
 
       <h2 style={{ fontSize: 20, margin: "10px 0 12px" }}>Lessons</h2>
-      <div style={{ display: "grid", gap: 8 }}>
+      <div style={{ display: "grid", gap: 8 }} className="stagger">
         {c.lessons.map((l, i) => {
           const ok = owned || l.preview;
           return (
-            <button key={l.id} className={"lesson" + (lesson && l.id === lesson.id ? " on" : "")} onClick={() => ok ? setLid(l.id) : buy("course", c)}>
+            <button key={l.id} style={{ "--i": Math.min(i, 10) }} className={"lesson" + (lesson && l.id === lesson.id ? " on" : "")} onClick={() => { if (ok) { setLid(l.id); window.scrollTo({ top: 0, behavior: "smooth" }); } else buy("course", c); }}>
               <span className="n">{i + 1}</span>
               <span className="t">{l.title}</span>
               {done(l) && <span className="tag free">Done</span>}
@@ -704,6 +856,130 @@ function CoursePage({ id }) {
 }
 
 /* ============================================================
+   TEACHERS
+   ============================================================ */
+function TeacherCard({ t, i = 0 }) {
+  const { setModal } = useApp();
+  return (
+    <button className="tcard" style={{ "--i": i }} onClick={() => setModal({ kind: "teacher", teacher: t })}>
+      <Avatar t={t} size={64} />
+      <div style={{ minWidth: 0 }}>
+        <h3>{t.name}</h3>
+        {t.subject && <span className="tag" style={{ display: "inline-block", margin: "6px 0 4px" }}>{t.subject}</span>}
+        {t.experience && <div className="muted">{t.experience}</div>}
+      </div>
+    </button>
+  );
+}
+
+function Teachers() {
+  const { db, isAdmin, setModal } = useApp();
+  return (
+    <>
+      <div className="row sp" style={{ marginBottom: 6 }}>
+        <h2 style={{ fontSize: 28 }}>Teachers</h2>
+        {isAdmin && <button className="btn sm" onClick={() => setModal({ kind: "teacherForm", teacher: null })}>Add teacher</button>}
+      </div>
+      <p className="muted" style={{ marginBottom: 16 }}>Learn from people who do this work every day.</p>
+      {db.teachers.length === 0
+        ? <div className="empty">{isAdmin ? "No teachers yet. Tap Add teacher to introduce the first one." : "Teachers will be listed here soon."}</div>
+        : <div className="grid stagger">{db.teachers.map((t, i) => <TeacherCard key={t.id} t={t} i={Math.min(i, 8)} />)}</div>}
+    </>
+  );
+}
+
+function TeacherModal({ teacher }) {
+  const { db, setModal, go, isAdmin } = useApp();
+  const t = db.teachers.find((x) => x.id === teacher.id) || teacher;
+  const courses = db.courses.filter((c) => c.teacherId === t.id);
+  const facts = [["Subject", t.subject], ["Qualification", t.qualification], ["Experience", t.experience]].filter((x) => x[1]);
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="tbig">
+          <Avatar t={t} size={92} />
+          <div><h2 style={{ fontSize: 24 }}>{t.name}</h2>{t.subject && <div className="muted">{t.subject}</div>}</div>
+        </div>
+        {facts.length > 0 && <div className="facts">{facts.map(([k, v]) => <div key={k}><span>{k}</span>{v}</div>)}</div>}
+        {t.bio && <p className="bio">{t.bio}</p>}
+        {t.link && <a className="btn ghost sm" style={{ display: "inline-block", textDecoration: "none", marginBottom: 14 }} href={/^https?:\/\//.test(t.link) ? t.link : "https://" + t.link} target="_blank" rel="noopener noreferrer">Visit profile</a>}
+        {courses.length > 0 && (
+          <>
+            <h3 style={{ fontSize: 17, margin: "6px 0 10px" }}>Courses by {t.name.split(" ")[0]}</h3>
+            <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
+              {courses.map((c) => <button key={c.id} className="lesson" onClick={() => { setModal(null); go("course", { id: c.id }); }}><span className="t">{c.title}</span><PriceTag item={c} owned={false} /></button>)}
+            </div>
+          </>
+        )}
+        <div className="row">
+          {isAdmin && <button className="btn ghost" onClick={() => setModal({ kind: "teacherForm", teacher: t })}>Edit</button>}
+          <button className="btn" style={{ flex: 1 }} onClick={() => setModal(null)}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeacherForm({ teacher }) {
+  const { setModal, say, refresh } = useApp();
+  const [f, setF] = useState(teacher ? { ...teacher } : { name: "", subject: "", qualification: "", experience: "", bio: "", photo: "", link: "" });
+  const [upl, setUpl] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+
+  const upPhoto = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { say("Photo is too big. Use one under 5 MB."); return; }
+    setUpl(true);
+    const path = "teachers/" + Date.now() + "-" + safeName(file.name);
+    const up = await sb.storage.from("public-assets").upload(path, file);
+    setUpl(false);
+    if (up.error) { say(up.error.message); return; }
+    const { data } = sb.storage.from("public-assets").getPublicUrl(path);
+    setF((x) => ({ ...x, photo: data.publicUrl })); say("Photo uploaded");
+  };
+
+  const save = async () => {
+    if (!f.name.trim()) { setErr("Add the teacher's name."); return; }
+    setSaving(true); setErr("");
+    const id = f.id || newId();
+    const { error } = await sb.from("teachers").upsert({
+      id, name: f.name.trim(), subject: f.subject.trim(), qualification: f.qualification.trim(), experience: f.experience.trim(),
+      bio: f.bio, photo_url: f.photo || "", link: f.link.trim(),
+    });
+    setSaving(false);
+    if (error) { setErr(error.message); return; }
+    await refresh(); setModal(null); say(teacher ? "Teacher saved" : "Teacher added");
+  };
+
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{teacher ? "Edit teacher" : "Add teacher"}</h2>
+        <div className="tbig">
+          <Avatar t={f} size={84} />
+          <div className="field" style={{ margin: 0, flex: 1 }}>
+            <label>Photo (under 5 MB)</label>
+            <input type="file" accept="image/*" onChange={(e) => upPhoto(e.target.files[0])} />
+            {upl && <span className="muted">Uploading...</span>}
+            {f.photo && !upl && <button className="muted" style={{ textAlign: "left", color: "var(--danger)" }} onClick={() => setF({ ...f, photo: "" })}>Remove photo</button>}
+          </div>
+        </div>
+        <div className="field"><label htmlFor="tn">Name</label><input id="tn" className="inp" value={f.name} onChange={set("name")} /></div>
+        <div className="field"><label htmlFor="ts">Subject they teach</label><input id="ts" className="inp" value={f.subject} onChange={set("subject")} placeholder="e.g. Ethical Hacking" /></div>
+        <div className="field"><label htmlFor="tq">Qualification</label><input id="tq" className="inp" value={f.qualification} onChange={set("qualification")} placeholder="e.g. B.Tech in Computer Science" /></div>
+        <div className="field"><label htmlFor="te">Experience</label><input id="te" className="inp" value={f.experience} onChange={set("experience")} placeholder="e.g. 5 years in cybersecurity" /></div>
+        <div className="field"><label htmlFor="tb">About the teacher</label><textarea id="tb" className="inp" style={{ minHeight: 120 }} value={f.bio} onChange={set("bio")} placeholder="Background, skills, what students will learn" /></div>
+        <div className="field"><label htmlFor="tl">Profile link (optional)</label><input id="tl" className="inp" value={f.link} onChange={set("link")} placeholder="Instagram, YouTube or website" /></div>
+        {err && <div className="err" role="alert">{err}</div>}
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save} disabled={saving || upl}>{saving ? "Saving..." : "Save teacher"}</button></div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    MY LEARNING
    ============================================================ */
 function Learning() {
@@ -713,10 +989,10 @@ function Learning() {
   const pending = db.purchases.filter((p) => p.userId === me.id && p.status === "pending");
   return (
     <>
-      <h2 style={{ fontSize: 28, marginBottom: 14 }}>My learning</h2>
+      <h2 style={{ fontSize: 28, marginBottom: 14 }}>My courses</h2>
       {pending.length > 0 && <div className="sub muted">{pending.length} payment(s) waiting for approval.</div>}
       {mine.length
-        ? <div className="grid">{mine.map((c) => <CourseCard key={c.id} c={c} />)}</div>
+        ? <div className="grid stagger">{mine.map((c, i) => <div key={c.id} style={{ "--i": i, display: "flex" }}><div style={{ display: "flex", flex: 1 }}><CourseCard c={c} /></div></div>)}</div>
         : <div className="empty">You have not bought any course yet.<div style={{ marginTop: 12 }}><button className="btn" onClick={() => go("browse")}>Find a course</button></div></div>}
     </>
   );
@@ -767,32 +1043,39 @@ function BuyModal({ type, item }) {
    ADMIN
    ============================================================ */
 function Admin() {
-  const { db, setModal, say, refresh } = useApp();
-  const [tab, setTab] = useState("courses");
+  const { db, view, setModal, say, refresh } = useApp();
+  const [tab, setTab] = useState(view.tab || "courses");
   const pending = db.purchases.filter((p) => p.status === "pending").length;
 
+  const del = async (table, id, msg) => {
+    if (!confirm(msg)) return;
+    const { error } = await sb.from(table).delete().eq("id", id);
+    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  };
   const setStatus = async (id, status) => {
     const { error } = await sb.from("purchases").update({ status }).eq("id", id);
     if (error) { say(error.message); return; }
     say(status === "approved" ? "Approved. Course unlocked." : "Rejected"); refresh();
   };
-  const delCourse = async (id) => {
-    if (!confirm("Delete this course and all its lessons?")) return;
-    const { error } = await sb.from("courses").delete().eq("id", id);
-    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  const delCat = (c) => {
+    const n = db.courses.filter((x) => x.category === c.id).length + db.commands.filter((x) => x.category === c.id).length;
+    if (n) { say("Move or delete its " + n + " item(s) first."); return; }
+    del("categories", c.id, "Delete the category " + c.name + "?");
   };
-  const delCmd = async (id) => {
-    if (!confirm("Delete this command?")) return;
-    const { error } = await sb.from("commands").delete().eq("id", id);
-    if (error) say(error.message); else { say("Deleted"); refresh(); }
+  const move = async (i, dir) => {
+    const j = i + dir; if (j < 0 || j >= db.categories.length) return;
+    const arr = [...db.categories]; [arr[i], arr[j]] = [arr[j], arr[i]];
+    const { error } = await sb.from("categories").upsert(arr.map((c, k) => ({ id: c.id, name: c.name, glyph: c.glyph, sub: c.sub || "", hue: c.hue, has_commands: !!c.hasCommands, position: k + 1 })));
+    if (error) say(error.message); else refresh();
   };
+
+  const TABS = [["courses", "Courses"], ["commands", "Commands"], ["teachers", "Teachers"], ["categories", "Categories"], ["payments", "Payments" + (pending ? " (" + pending + ")" : "")], ["settings", "Settings"]];
 
   return (
     <>
       <h2 style={{ fontSize: 28 }}>Admin panel</h2>
       <div className="seg" role="tablist" style={{ maxWidth: "100%", overflowX: "auto" }}>
-        {[["courses", "Courses"], ["commands", "Commands"], ["payments", "Payments" + (pending ? " (" + pending + ")" : "")], ["settings", "Settings"]].map(([k, n]) =>
-          <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{n}</button>)}
+        {TABS.map(([k, n]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{n}</button>)}
       </div>
 
       {tab === "courses" && (
@@ -807,7 +1090,7 @@ function Admin() {
               </div>
               <div className="row">
                 <button className="btn ghost sm" onClick={() => setModal({ kind: "course", course: c })}>Edit</button>
-                <button className="btn danger sm" onClick={() => delCourse(c.id)}>Delete</button>
+                <button className="btn danger sm" onClick={() => del("courses", c.id, "Delete this course and all its lessons?")}>Delete</button>
               </div>
             </div>
           ))}
@@ -822,11 +1105,54 @@ function Admin() {
             <div className="item" key={m.id}>
               <div style={{ minWidth: 0 }}>
                 <b>{m.title}</b>
-                <div className="muted">{m.isFree ? "Free" : "₹" + m.price}</div>
+                <div className="muted">{catOf(m.category).name} · {m.isFree ? "Free" : "₹" + m.price}</div>
               </div>
               <div className="row">
                 <button className="btn ghost sm" onClick={() => setModal({ kind: "command", command: m })}>Edit</button>
-                <button className="btn danger sm" onClick={() => delCmd(m.id)}>Delete</button>
+                <button className="btn danger sm" onClick={() => del("commands", m.id, "Delete this command?")}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {tab === "teachers" && (
+        <>
+          <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "teacherForm", teacher: null })}>Add teacher</button>
+          {db.teachers.length === 0 && <div className="empty">No teachers yet.</div>}
+          {db.teachers.map((t) => (
+            <div className="item" key={t.id}>
+              <div className="row" style={{ minWidth: 0 }}>
+                <Avatar t={t} size={44} />
+                <div style={{ minWidth: 0 }}><b>{t.name}</b><div className="muted">{t.subject || "No subject set"}</div></div>
+              </div>
+              <div className="row">
+                <button className="btn ghost sm" onClick={() => setModal({ kind: "teacherForm", teacher: t })}>Edit</button>
+                <button className="btn danger sm" onClick={() => del("teachers", t.id, "Delete " + t.name + "?")}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {tab === "categories" && (
+        <>
+          <p className="muted" style={{ marginBottom: 12 }}>These are the tracks students see. Turn on the Commands section for any category that needs it, like Hacking.</p>
+          <button className="btn" style={{ marginBottom: 14 }} onClick={() => setModal({ kind: "category", category: null })}>Add category</button>
+          {db.categories.map((c, i) => (
+            <div className="item" key={c.id}>
+              <div className="row" style={{ minWidth: 0 }}>
+                <span className="glyph" style={{ alignSelf: "center" }}>{c.glyph}</span>
+                <div style={{ minWidth: 0 }}>
+                  <b>{c.name}</b>
+                  <div className="muted">{db.courses.filter((x) => x.category === c.id).length} courses{c.hasCommands ? " · Commands on" : ""}</div>
+                </div>
+              </div>
+              <div className="row wrapx">
+                <button className="btn ghost sm" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">Up</button>
+                <button className="btn ghost sm" disabled={i === db.categories.length - 1} onClick={() => move(i, 1)} aria-label="Move down">Down</button>
+                <button className="btn ghost sm" onClick={() => setModal({ kind: "category", category: c })}>Edit</button>
+                <button className="btn danger sm" onClick={() => delCat(c)}>Delete</button>
               </div>
             </div>
           ))}
@@ -888,6 +1214,42 @@ function SettingsTab() {
   );
 }
 
+/* ---------- Category form ---------- */
+function CategoryForm({ category }) {
+  const { db, setModal, say, refresh } = useApp();
+  const [f, setF] = useState(category ? { ...category } : { name: "", glyph: "", sub: "", hue: 200, hasCommands: false });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const save = async () => {
+    if (!f.name.trim()) { setErr("Add a category name."); return; }
+    setSaving(true); setErr("");
+    const glyph = (f.glyph.trim() || f.name.trim().slice(0, 2)).slice(0, 4);
+    const { error } = await sb.from("categories").upsert({
+      id: f.id || slug(f.name), name: f.name.trim(), glyph, sub: f.sub.trim(), hue: f.hue, has_commands: !!f.hasCommands,
+      position: f.position || db.categories.length + 1,
+    });
+    setSaving(false);
+    if (error) { setErr(error.message); return; }
+    await refresh(); setModal(null); say(category ? "Category saved" : "Category added");
+  };
+  return (
+    <div className="ov" onClick={() => setModal(null)}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <h2 style={{ fontSize: 22, marginBottom: 16 }}>{category ? "Edit category" : "Add category"}</h2>
+        <div className="field"><label htmlFor="kn">Name</label><input id="kn" className="inp" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="e.g. Cyber Security" /></div>
+        <div className="field"><label htmlFor="ks">Short description</label><input id="ks" className="inp" value={f.sub} onChange={(e) => setF({ ...f, sub: e.target.value })} placeholder="e.g. Protect systems and data" /></div>
+        <div className="field"><label htmlFor="kg">Icon text (up to 4 characters)</label><input id="kg" className="inp" maxLength={4} value={f.glyph} onChange={(e) => setF({ ...f, glyph: e.target.value })} placeholder="e.g. </>" /></div>
+        <div className="field"><label>Color</label>
+          <div className="swatches">{HUES.map((h) => <button key={h} type="button" aria-label={"Color " + h} className={"sw" + (f.hue === h ? " on" : "")} style={{ background: "hsl(" + h + " 55% 45%)" }} onClick={() => setF({ ...f, hue: h })} />)}</div>
+        </div>
+        <label className="switch" style={{ marginBottom: 16 }}><input type="checkbox" checked={!!f.hasCommands} onChange={(e) => setF({ ...f, hasCommands: e.target.checked })} />Add a Commands section (like Hacking)</label>
+        {err && <div className="err" role="alert">{err}</div>}
+        <div className="row"><button className="btn ghost" onClick={() => setModal(null)}>Cancel</button><button className="btn" style={{ flex: 1 }} onClick={save} disabled={saving}>{saving ? "Saving..." : "Save category"}</button></div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Free / Paid control used in both forms ---------- */
 function PriceField({ f, setF }) {
   return (
@@ -905,10 +1267,10 @@ function PriceField({ f, setF }) {
 }
 
 function CourseForm({ course }) {
-  const { setModal, say, refresh } = useApp();
+  const { db, setModal, say, refresh } = useApp();
   const [f, setF] = useState(course
     ? { ...course, lessons: course.lessons.map((l) => ({ ...l, url: "" })) }
-    : { title: "", desc: "", category: "hacking", isFree: false, price: 499, lessons: [] });
+    : { title: "", desc: "", category: CATS[0] ? CATS[0].id : "", teacherId: "", isFree: false, price: 499, lessons: [] });
   const [loadingUrls, setLoadingUrls] = useState(!!course);
   const [uploading, setUploading] = useState(-1);
   const [saving, setSaving] = useState(false);
@@ -944,7 +1306,7 @@ function CourseForm({ course }) {
     setSaving(true); setErr("");
     try {
       const id = f.id || newId();
-      let r = await sb.from("courses").upsert({ id, category: f.category, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0 });
+      let r = await sb.from("courses").upsert({ id, category: f.category, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0, teacher_id: f.teacherId || null });
       if (r.error) throw r.error;
       const lessons = f.lessons.map((l, i) => ({ id: l.id, course_id: id, title: l.title.trim() || "Lesson " + (i + 1), duration: l.duration || "", is_preview: !!l.preview, position: i }));
       let dq = sb.from("lessons").delete().eq("course_id", id);
@@ -968,6 +1330,12 @@ function CourseForm({ course }) {
         <div className="field"><label htmlFor="cc">Category</label>
           <select id="cc" className="inp" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
             {CATS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div className="field"><label htmlFor="cth">Teacher</label>
+          <select id="cth" className="inp" value={f.teacherId || ""} onChange={(e) => setF({ ...f, teacherId: e.target.value })}>
+            <option value="">No teacher selected</option>
+            {db.teachers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
         <PriceField f={f} setF={setF} />
@@ -1001,11 +1369,13 @@ function CourseForm({ course }) {
   );
 }
 
-function CommandForm({ command }) {
+function CommandForm({ command, cat }) {
   const { db, setModal, say, refresh } = useApp();
+  const withCmd = CATS.filter((c) => c.hasCommands);
+  const firstCat = cat || (withCmd[0] && withCmd[0].id) || "hacking";
   const [f, setF] = useState(command
     ? { ...command, cmd: db.bodies[command.id] || "" }
-    : { title: "", cmd: "", desc: "", isFree: true, price: 99 });
+    : { title: "", cmd: "", desc: "", category: firstCat, isFree: true, price: 99 });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
   const save = async () => {
@@ -1013,7 +1383,7 @@ function CommandForm({ command }) {
     setSaving(true); setErr("");
     try {
       const id = f.id || newId();
-      let r = await sb.from("commands").upsert({ id, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0 });
+      let r = await sb.from("commands").upsert({ id, category: f.category, title: f.title.trim(), description: f.desc, is_free: f.isFree, price: f.isFree ? 0 : Number(f.price) || 0 });
       if (r.error) throw r.error;
       r = await sb.from("command_bodies").upsert({ command_id: id, body: f.cmd }); if (r.error) throw r.error;
       await refresh(); setModal(null); say(command ? "Command saved" : "Command added");
@@ -1024,6 +1394,13 @@ function CommandForm({ command }) {
     <div className="ov" onClick={() => setModal(null)}>
       <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <h2 style={{ fontSize: 22, marginBottom: 16 }}>{command ? "Edit command" : "Add command"}</h2>
+        {withCmd.length > 1 && (
+          <div className="field"><label htmlFor="mk">Category</label>
+            <select id="mk" className="inp" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
+              {withCmd.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+        )}
         <div className="field"><label htmlFor="mt">Title</label><input id="mt" className="inp" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></div>
         <div className="field"><label htmlFor="mc">Command</label><textarea id="mc" className="inp" style={{ fontFamily: "var(--mono)" }} value={f.cmd} onChange={(e) => setF({ ...f, cmd: e.target.value })} /></div>
         <div className="field"><label htmlFor="md">What it does</label><textarea id="md" className="inp" value={f.desc} onChange={(e) => setF({ ...f, desc: e.target.value })} /></div>
